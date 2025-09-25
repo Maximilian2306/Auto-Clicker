@@ -1,4 +1,5 @@
-from autoclicker.gui import start_gui
+from autoclicker.gui import AutoClickerGUI
 
 if __name__ == "__main__":
-    start_gui()
+    app = AutoClickerGUI()
+    app.run()
