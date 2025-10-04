@@ -1,78 +1,201 @@
-import tkinter as tk
-import threading, pyautogui, keyboard, time, math
+import threading
+import keyboard
+import mouse
+import time
+import ttkbootstrap as ttkb
+from ttkbootstrap import Style
+from ttkbootstrap import Window, StringVar, BooleanVar
+from ttkbootstrap.widgets import Frame, Label, Entry, Button, Checkbutton, Radiobutton, LabelFrame
+from ttkbootstrap.constants import *
 
-running = False
-button_area = None
+from .themes import toggle_theme
+from .utils import update_status
 
-def auto_clicker(delay, duration, follow_8, fixed_x, fixed_y, click_type):
+# from . import logic_pyautogui, logic_sendinput
+from . import logic_pyautogui
 
-    global running, button_area
-    start = time.time()
 
-    if button_area:
-        while running:
-            x, y = pyautogui.position()
-            if not (button_area[0] <= x <= button_area[2] and button_area[1] <= y <= button_area[3]):
-                break
-            time.sleep(0.05)
-    while running:
-        if fixed_x is not None and fixed_y is not None:
-            pyautogui.moveTo(fixed_x, fixed_y)
-        if follow_8:
-            t = time.time()
-            cx, cy = pyautogui.size()
-            cx //= 2; cy //= 2
-            r = 100
-            x = cx + int(r * math.sin(t)/(1+math.cos(t)**2))
-            y = cy + int(r * math.sin(t)*math.cos(t)/(1+math.cos(t)**2))
-            pyautogui.moveTo(x, y)
-        pyautogui.click(button=click_type)
-        time.sleep(delay)
-        if duration>0 and (time.time()-start)>=duration:
-            running=False
-            status_label.config(text="STOPP", fg="red")
-            break
+class AutoClickerGUI:
+    def __init__(self) -> None:
+        self.root = Window(themename="flatly")
+        self.root.title("Auto-Clicker")
+        self.root.geometry("600x500")
+        self.root.resizable(True, True)
 
-def toggle_clicker():
+        self.style: Style = Style("flatly") # light
 
-    global running
-    running = not running
+        # Thread Stop-Event
+        self.stop_event: threading.Event = threading.Event()
 
-    if running:
-        try: d = float(delay_entry.get())
-        except: d=0.1
-        try: du = float(duration_entry.get())
-        except: du=0
-        f8 = follow_8_var.get()
-        try: fx=int(x_entry.get()); fy=int(y_entry.get())
-        except: fx=fy=None
-        click = click_type_var.get()
-        bx1=start_button.winfo_rootx(); by1=start_button.winfo_rooty()
-        bx2=bx1+start_button.winfo_width(); by2=by1+start_button.winfo_height()
-        global button_area; button_area=(bx1,by1,bx2,by2)
-        threading.Thread(target=auto_clicker, args=(d,du,f8,fx,fy,click), daemon=True).start()
-        status_label.config(text="LÄUFT", fg="green")
-    else:
-        status_label.config(text="STOPP", fg="red")
+        # UI 
+        self._build_ui()
 
-root = tk.Tk(); root.title("AutoClicker"); root.geometry("400x300")
+        # Hotkeys global
+        keyboard.add_hotkey("f6", self.toggle_clicker)
+        keyboard.add_hotkey("esc", self.root.quit)
 
-tk.Label(root,text="Delay:").pack(); delay_entry=tk.Entry(root); delay_entry.insert(0,"0.1"); delay_entry.pack()
-tk.Label(root,text="Dauer:").pack(); duration_entry=tk.Entry(root); duration_entry.insert(0,"0"); duration_entry.pack()
+    def _build_ui(self) -> None:
+        main_frame = Frame(self.root, padding=20)
+        main_frame.pack(fill="both", expand=True)
 
-follow_8_var=tk.BooleanVar(); tk.Checkbutton(root,text="8-Schleife",variable=follow_8_var).pack()
+        # ---------------- Einstellungen ----------------
+        settings_frame = LabelFrame(main_frame, text=" Settings ", padding=10)
+        settings_frame.pack(fill="x", pady=10)
 
-tk.Label(root,text="X:").pack(); x_entry=tk.Entry(root); x_entry.pack()
-tk.Label(root,text="Y:").pack(); y_entry=tk.Entry(root); y_entry.pack()
+        Label(settings_frame, text="Click-Delay (Seconds):").grid(row=0, column=0, sticky="w", padx=5, pady=5)
+        self.delay_entry = Entry(settings_frame, width=10)
+        self.delay_entry.insert(0, "0.1")
+        self.delay_entry.grid(row=0, column=1, padx=5, pady=5)
 
-click_type_var=tk.StringVar(value="left")
+        Label(settings_frame, text="Loop (Seconds, 0 = infinite):").grid(row=1, column=0, sticky="w", padx=5, pady=5)
+        self.duration_entry = Entry(settings_frame, width=10)
+        self.duration_entry.insert(0, "0")
+        self.duration_entry.grid(row=1, column=1, padx=5, pady=5)
 
-tk.Radiobutton(root,text="Links",variable=click_type_var,value="left").pack()
-tk.Radiobutton(root,text="Rechts",variable=click_type_var,value="right").pack()
+        self.follow_8_var = BooleanVar() # tk.BooleanVar()
+        Checkbutton(settings_frame, text="Mouse follows '8' loop", variable=self.follow_8_var).grid(
+            row=2, column=0, columnspan=2, sticky="w", padx=5, pady=5
+        )
 
-start_button=tk.Button(root,text="Start/Stop",command=toggle_clicker); start_button.pack(pady=5)
-status_label=tk.Label(root,text="STOPP",fg="red"); status_label.pack()
+        # Checkbox für SendInput
+        # Checkbutton(settings_frame, text="Direkte SendInput-Clicks verwenden", variable=self.use_sendinput).grid(
+        #     row=3, column=0, columnspan=2, sticky="w", padx=5, pady=5
+        # )
 
-keyboard.add_hotkey("f6", toggle_clicker); keyboard.add_hotkey("esc", lambda: root.quit())
+        # ---------------- Klickoptionen ----------------
+        click_frame = LabelFrame(main_frame, text=" Click Options ", padding=10)
+        click_frame.pack(fill="x", pady=10)
 
-root.mainloop()
+        Label(click_frame, text="Fixed X coordinate:").grid(row=0, column=0, padx=5, pady=5)
+        self.x_entry = Entry(click_frame, width=10)
+        self.x_entry.grid(row=0, column=1, padx=5, pady=5)
+
+        Label(click_frame, text="Fixed Y coordinate:").grid(row=1, column=0, padx=5, pady=5)
+        self.y_entry = Entry(click_frame, width=10)
+        self.y_entry.grid(row=1, column=1, padx=5, pady=5)
+
+        # Button to find coordinates
+        Button(
+            click_frame,
+            text="Find Coordinates",
+            bootstyle="info-outline",
+            command=self.capture_coordinates
+        ).grid(row=0, column=2, columnspan=2, pady=5)
+
+        self.click_type_var = StringVar(value="left") # tk.StringVar(value="left")
+        Radiobutton(click_frame, text="Leftclick", variable=self.click_type_var, value="left").grid(
+            row=3, column=0, padx=5, pady=5, sticky="w"
+        )
+        Radiobutton(click_frame, text="Rightclick", variable=self.click_type_var, value="right").grid(
+            row=3, column=1, padx=5, pady=5, sticky="w"
+        )
+
+        # ---------------- Steuerung ----------------
+        control_frame = LabelFrame(main_frame, text=" Cockpit ", padding=10)
+        control_frame.pack(fill="x", pady=10)
+
+        self.start_button = Button(control_frame, text="Start / Stop", command=self.toggle_clicker, bootstyle="success-outline")
+        self.start_button.pack(pady=5)
+
+        self.status_label = Label(
+            control_frame,
+            text="Status: STOP",
+            font=("Segoe UI", 12, "bold"),
+            bootstyle="danger"  # foreground="red"
+        )
+        self.status_label.pack(pady=5)
+
+        # ---------------- Hotkey-Infos ----------------
+        hotkey_frame = LabelFrame(main_frame, text=" Hotkeys ", padding=10)
+        hotkey_frame.pack(fill="x", pady=10)
+
+        Label(hotkey_frame, text="F6  → Start/Stop").pack(anchor="w", padx=5)
+        Label(hotkey_frame, text="ESC → End").pack(anchor="w", padx=5)
+
+        # ---------------- Theme-Umschalter ----------------
+        Button(
+            main_frame,
+            text="Dark/Light Mode Switch",
+            command= lambda: toggle_theme(self.style), # toggle_theme(self.style),
+            bootstyle="secondary-outline"
+        ).pack(pady=15)
+
+
+    def toggle_clicker(self) -> None:
+        if self.stop_event.is_set():  # If already stopped, restart
+            self.stop_event.clear()
+        else:
+            self.stop_event.set()  # stop
+            update_status(self.status_label, "STOP", "red")
+            return
+
+        try:
+            delay: float = float(self.delay_entry.get())
+        except ValueError:
+            delay = 0.1
+
+        try:
+            duration: float = float(self.duration_entry.get())
+        except ValueError:
+            duration = 0
+
+        follow_8: bool = self.follow_8_var.get()
+
+        try:
+            fx = int(self.x_entry.get())
+            fy = int(self.y_entry.get())
+            fixed_x, fixed_y = fx, fy
+        except ValueError:
+            fixed_x, fixed_y = None, None
+
+        click_type: str = self.click_type_var.get()
+
+        # save button coordinates
+        bx1 = self.start_button.winfo_rootx()
+        by1 = self.start_button.winfo_rooty()
+        bx2 = bx1 + self.start_button.winfo_width()
+        by2 = by1 + self.start_button.winfo_height()
+        # logic.button_area = (bx1, by1, bx2, by2)
+
+        # logic_module = logic_sendinput if self.use_sendinput.get() else logic_pyautogui
+        logic_pyautogui.button_area = (bx1, by1, bx2, by2)
+
+        # start thread
+        self.stop_event.clear()
+        threading.Thread(
+            target=logic_pyautogui.auto_clicker,
+            args=(delay, duration, follow_8, fixed_x, fixed_y, click_type, lambda t, c: update_status(self.status_label, t, c), self.stop_event),
+            daemon=True
+        ).start()
+        update_status(self.status_label, "RUNNING", "green")
+
+
+    def capture_coordinates(self):
+        """Waits for the next mouse click and captures the coordinates."""
+        update_status(self.status_label, "Waiting on mouse movement...", "orange")
+
+        def wait_for_click():
+            time.sleep(0.3)
+
+            def on_click(event):
+                if isinstance(event, mouse.ButtonEvent) and event.event_type == "down":
+                    # x, y = event.x, event.y
+                    x, y = mouse.get_position()
+                    self.x_entry.delete(0, "end")
+                    self.x_entry.insert(0, str(x))
+                    self.y_entry.delete(0, "end")
+                    self.y_entry.insert(0, str(y))
+
+                    update_status(self.status_label, f"Koordinaten erfasst: {x}, {y}", "green")
+
+                    mouse.unhook(on_click)
+
+            mouse.hook(on_click)
+
+        threading.Thread(target=wait_for_click, daemon=True).start()
+
+
+    def run(self) -> None:
+        self.root.mainloop()
+
+
