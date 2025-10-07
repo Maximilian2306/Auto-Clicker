@@ -61,3 +61,5 @@ def move_mouse_in_8_pattern():
     x = center_x + int(radius * math.sin(t) / (1 + math.cos(t) ** 2))
     y = center_y + int(radius * math.sin(t) * math.cos(t) / (1 + math.cos(t) ** 2))
     pyautogui.moveTo(x, y)
+
+
