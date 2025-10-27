@@ -1,51 +1,46 @@
-# top_bar.py
-from ttkbootstrap import Frame, Label, Button, Combobox
+# autoclicker/gui/top_bar.py
+import ttkbootstrap as ttkb
+from ttkbootstrap.widgets import Frame, Label, Button, Combobox
+from typing import Callable
 
 
-class TopBar(Frame):
-    def __init__(self, manager, parent):
-        super().__init__(parent, padding=15)
+class TopBar:
+    """Top bar component with title, profile selector, and theme toggle."""
+
+    def __init__(self, manager, parent, on_cycle_theme):
         self.manager = manager
-        self.pack(fill="x")
-        self._build_ui()
+        self.parent = parent
+        self.on_cycle_theme = on_cycle_theme
 
-    def _build_ui(self):
-        # Titel
-        Label(
-            self,
-            text="Modern Auto-Clicker Pro",
+        self._build()
+
+    def _build(self):
+
+        top_bar = Frame(self.parent, padding=15)
+        top_bar.pack(fill="x")
+        
+        # App title 
+        title_label = Label(
+            top_bar,
+            text="ClickMax Pro",
             font=("Segoe UI", 18, "bold"),
-            bootstyle="primary",
-        ).pack(side="left", padx=10)
-
-        # Profilauswahl
-        profile_frame = Frame(self)
-        profile_frame.pack(side="right", padx=10)
-
-        Label(profile_frame, text="Profile:").pack(side="left", padx=5)
-        self.profile_combo = Combobox(
-            profile_frame,
-            textvariable=self.manager.state["current_profile"],
-            values=["Default", "Gamer", "Custom1"],  # später dynamisch laden
-            width=15,
-            bootstyle="primary",
+            bootstyle="primary"
         )
-        self.profile_combo.pack(side="left")
-
-        # Theme-Toggle
+        title_label.pack(side="left", padx=10)
+        
+        # Profile selector
+        profile_frame = Frame(top_bar)
+        profile_frame.pack(side="right", padx=10)
+        
+        Label(profile_frame, text="Profile:").pack(side="left", padx=5)
+        # self.profile_combo.pack(side="left")
+        # self.profile_combo.bind("<<ComboboxSelected>>", self.on_profile_selected)
+        
+        # Quick theme toggle
         Button(
-            self,
+            top_bar,
             text="🎨",
-            command=self._cycle_theme,
+            command=self.on_cycle_theme,
             bootstyle="secondary-outline",
-            width=3,
+            width=3
         ).pack(side="right", padx=5)
-
-    def _cycle_theme(self):
-        themes = ["cyborg", "flatly", "superhero", "darkly"]
-        self.manager.current_theme_index = (
-            self.manager.current_theme_index + 1
-        ) % len(themes)
-        new_theme = themes[self.manager.current_theme_index]
-        self.manager.style.theme_use(new_theme)
-        self.manager.update_status(f"Theme changed to {new_theme}")
