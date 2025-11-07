@@ -2,6 +2,7 @@
 """
 Theme Management Utility
 Handles theme cycling and application
+
 """
 
 from typing import Callable, List
@@ -17,7 +18,7 @@ class ThemeManager:
         self.available_themes = themes
 
     def cycle_theme(self, style_object, on_theme_applied: Callable[[str], None],) -> str:
-        """Cycle through available themes - Returns: Name of new theme"""
+        """Cycle through available themes"""
         if not self.available_themes:
             return None
 
@@ -28,23 +29,13 @@ class ThemeManager:
         return theme_name
 
     def apply_theme(self, style_object, theme_name: str, on_theme_applied: Callable[[str], None],) -> bool:
-        """Apply a specific theme - Returns: True if successful"""
-        # try:
-        #     style_object.theme_use(theme_name)
-        #     on_theme_applied(f"✓ Theme changed to {theme_name}")
-        #     return True
-        # except Exception as e:
-        #     on_theme_applied(f"❌ Error applying theme: {e}")
-        #     return False
-
+        """Apply a specific theme"""
         try:
             style_object.theme_use(theme_name)
-            # Erfolg: sende reinen Theme-Namen
             if on_theme_applied:
                 on_theme_applied(theme_name)
             return True
         except Exception as e:
-            # Fehler: sende Fehler-String
             if on_theme_applied:
                 on_theme_applied(f"❗ Error applying theme: {e}")
             return False

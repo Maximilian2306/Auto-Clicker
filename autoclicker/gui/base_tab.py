@@ -5,8 +5,9 @@ from ttkbootstrap.widgets import Frame
 
 class BaseTab(ttkb.Frame):
     """
-    Base class for all tabs – provides access to GUIManager.
+    Base class for all tabs - provides access to GUIManager.
     Each tab inherits from this class and overrides _build_content().
+    
     """
 
     def __init__(self, parent, manager):
@@ -20,7 +21,5 @@ class BaseTab(ttkb.Frame):
         self._build_content()
 
     def _build_content(self):
-        """
-        Child class must override this method.
-        """
+        """Builds content"""
         raise NotImplementedError("Subclasses must implement _build_content()")
