@@ -6,6 +6,7 @@ from ttkbootstrap.widgets import Frame, Label, Button
 class MainControlButton:
     """
     Creates the main start button + status display.
+
     """
 
     @staticmethod
@@ -20,7 +21,6 @@ class MainControlButton:
         control_frame = Frame(parent)
         control_frame.pack(pady=20)
 
-        # Button mit übergebenem Callback
         start_button = Button(
             control_frame,
             text="▶️  START CLICKING",
@@ -31,7 +31,7 @@ class MainControlButton:
         )
         start_button.pack(pady=10)
 
-        # Statusanzeige
+        # === State label ===
         status_label = Label(
             control_frame,
             text="⚪ READY",

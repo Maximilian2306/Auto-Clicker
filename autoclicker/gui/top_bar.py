@@ -15,11 +15,12 @@ class TopBar:
         self._build()
 
     def _build(self):
+        """Builds content"""
 
         top_bar = Frame(self.parent, padding=15)
         top_bar.pack(fill="x")
-        
-        # App title 
+
+        # === App title === 
         title_label = Label(
             top_bar,
             text="ClickMax Pro",
@@ -27,20 +28,28 @@ class TopBar:
             bootstyle="primary"
         )
         title_label.pack(side="left", padx=10)
-        
-        # Profile selector
+
+        # === Profile selector ===
         profile_frame = Frame(top_bar)
         profile_frame.pack(side="right", padx=10)
-        
-        Label(profile_frame, text="Profile:").pack(side="left", padx=5)
-        # self.profile_combo.pack(side="left")
-        # self.profile_combo.bind("<<ComboboxSelected>>", self.on_profile_selected)
-        
-        # Quick theme toggle
+
+        profile_name_label = self.manager.state["current_profile"]
+
+        Label(profile_frame, text="Profile: ").pack(side="left", padx=5)
+        Combobox(
+            profile_frame,
+            textvariable=profile_name_label,
+            # values=self.manager.get_profile_names(),
+            state="readonly",
+            width=10,
+            bootstyle="primary"
+        ).pack(side="left", padx=5)
+
+        # === Quick theme toggle ===
         Button(
             top_bar,
             text="🎨",
             command=self.on_cycle_theme,
-            bootstyle="secondary-outline",
+            bootstyle="primary-outline",
             width=3
         ).pack(side="right", padx=5)

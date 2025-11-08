@@ -1,6 +1,7 @@
 # autoclicker/logic/capture_coordinates.py
 """
-Coordinate Capture Logic - 
+Coordinate Capture Logic - Capture mouse coordinates on click
+
 """
 
 import threading
@@ -24,6 +25,7 @@ class CaptureCoordinates:
         on_status: Callable[[str], None],
     ):
         """Listen for next mouse click and capture coordinates"""
+        
         if not mouse:
             on_status("❌ Mouse library not available")
             return
@@ -58,4 +60,3 @@ class CaptureCoordinates:
             return pyautogui.position()
         except Exception as e:
             print(f"Error getting mouse position: {e}")
-            return (0, 0)
