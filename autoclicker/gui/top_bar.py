@@ -23,7 +23,7 @@ class TopBar:
         # === App title === 
         title_label = Label(
             top_bar,
-            text="ClickMax Pro",
+            text="ClickMAX",
             font=("Segoe UI", 18, "bold"),
             bootstyle="primary"
         )
