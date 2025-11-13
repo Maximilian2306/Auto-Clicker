@@ -25,6 +25,15 @@ class MainTab(BaseTab):
         on_toggle_clicker: Callable[[], None],
         on_capture_coordinates: Callable[[], None],
     ):
+        """
+        Initialize MainTab with clicker controls and configuration
+
+        Args:
+            parent: Parent Tkinter widget
+            manager: GUIManager instance for accessing shared state
+            on_toggle_clicker: Callback function to toggle clicker on/off
+            on_capture_coordinates: Callback function to capture mouse coordinates
+        """
         self.on_toggle_clicker = on_toggle_clicker
         self.on_capture_coordinates = on_capture_coordinates
 
@@ -39,9 +48,12 @@ class MainTab(BaseTab):
 
         super().__init__(parent, manager)
 
-    def _build_content(self):
-        """Builds content"""
+    def _build_content(self) -> None:
+        """
+        Build the main tab UI content with all configuration controls
 
+        Creates click settings, advanced options, position settings, and main control button
+        """
         scroll_frame = ScrolledFrame(self, autohide=True)
         scroll_frame.pack(fill="both", expand=True, padx=20, pady=20)
 
@@ -191,8 +203,12 @@ class MainTab(BaseTab):
             on_toggle=self.on_toggle_clicker,
         )
 
-    def update_delay_label(self):
-        """Updates label right of the delay scale"""
+    def update_delay_label(self) -> None:
+        """
+        Update the delay label to reflect current delay value
+
+        Called when loading a profile to sync the label with the slider value
+        """
         try:
             self.delay_label.configure(text=f"{self.delay_var.get():.2f}s")
         except Exception:

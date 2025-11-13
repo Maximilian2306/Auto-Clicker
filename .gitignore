@@ -27,3 +27,8 @@ dist/
 # OS
 .DS_Store
 Thumbs.db
+
+# Claude AI Documentation & Commands
+CLAUDE.md
+REFACTORING_PLAN.md
+.claude/

@@ -24,6 +24,15 @@ class StatsTab(BaseTab):
         on_export_stats: Callable[[], None],
         on_reset_stats: Callable[[], None],
     ):
+        """
+        Initialize StatsTab with statistics display and export controls
+
+        Args:
+            parent: Parent Tkinter widget
+            manager: GUIManager instance for accessing shared state
+            on_export_stats: Callback function to export statistics to file
+            on_reset_stats: Callback function to reset all statistics
+        """
         self.on_export_stats = on_export_stats
         self.on_reset_stats = on_reset_stats
 
@@ -34,8 +43,12 @@ class StatsTab(BaseTab):
 
         super().__init__(parent, manager)
 
-    def _build_content(self):
-        """Builds content"""
+    def _build_content(self) -> None:
+        """
+        Build the statistics tab UI content with live stats and progress visualization
+
+        Creates live statistics display, progress bar, and export/reset buttons
+        """
         scroll_frame = ScrolledFrame(self, autohide=True)
         scroll_frame.pack(fill="both", expand=True, padx=20, pady=20)
 
@@ -99,12 +112,18 @@ class StatsTab(BaseTab):
             bootstyle="danger-outline",
         ).pack(pady=5)
 
-    def update_progress(self, value: int, text: str):
-        """Update progress bar"""
+    def update_progress(self, value: int, text: str) -> None:
+        """
+        Update the progress bar with dynamic styling based on completion percentage
+
+        Args:
+            value: Progress percentage (0-100)
+            text: Status text to display below progress bar
+        """
         self.progress_var.set(value)
         self.progress_label.config(text=text)
 
-        # Dynamic Color 
+        # Dynamic Color
         if value < 20:
             style = "danger-striped"
         elif value < 60:

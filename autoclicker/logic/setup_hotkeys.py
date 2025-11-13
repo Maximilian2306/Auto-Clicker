@@ -39,11 +39,13 @@ class SetupHotkeys:
             on_status("❌ Keyboard library not available")
             return False
         
-        key = key.strip().lower()
+        # key = key.strip().lower()
+        original_key = key.strip()        # für UI-Anzeige
+        normalized_key = original_key.lower()  # für keyboard
         
         # === Check if hotkey already in use ===
-        if any(existing_key == key for n, existing_key in self.hotkeys.items() if n != name):
-            on_status(f"⚠️  Hotkey [{key.upper()}] wird bereits verwendet!")
+        if any(existing_key.lower() == normalized_key for n, existing_key in self.hotkeys.items() if n != name):
+            on_status(f"⚠️  Hotkey [{original_key}] wird bereits verwendet!")
             return False
 
         try:
@@ -51,13 +53,13 @@ class SetupHotkeys:
                 self.unregister_hotkey(name)
 
             try:
-                keyboard.remove_hotkey(key)
+                keyboard.remove_hotkey(normalized_key)
             except Exception:
                 pass
 
-            keyboard.add_hotkey(key, callback)
+            keyboard.add_hotkey(normalized_key, callback)
             self.registered_hotkeys[name] = callback
-            self.hotkeys[name] = key
+            self.hotkeys[name] = original_key
 
 
             return True
@@ -76,8 +78,11 @@ class SetupHotkeys:
             if name in self.registered_hotkeys:
                 key = self.hotkeys.get(name)
                 if key:
-                    keyboard.remove_hotkey(key)
-                del self.registered_hotkeys[name]
+                    try:
+                        keyboard.remove_hotkey(key.lower())  # 🔧 normalize before removing
+                    except KeyError:
+                        pass
+            del self.registered_hotkeys[name]
             return True
         except Exception as e:
             print(f"Error unregistering hotkey: {e}")
@@ -95,6 +100,8 @@ class SetupHotkeys:
         on_status: Callable[[str], None],
     ) -> bool:
         """Setup all default hotkeys"""
+
+        self.cleanup()
 
         results = []
         results.append(
@@ -134,6 +141,7 @@ class SetupHotkeys:
     def get_all_hotkeys(self) -> Dict[str, str]:
         """Get all hotkey mappings"""
         return self.hotkeys.copy()
+        # return {name: key.upper() for name, key in self.hotkeys.items()}
 
     def cleanup(self):
         """Clean up all registered hotkeys"""
