@@ -10,20 +10,25 @@ class MainControlButton:
     """
 
     @staticmethod
-    def create(parent, on_toggle):
+    def create(parent, on_toggle, manager):
         """
         Creates the UI for the main control area.
 
         Args:
             parent: The parent widget (usually a Tab or Frame)
             on_toggle: Callback function to execute on button click
+            manager: GUIManager instance for translations
         """
+        def _t(key: str) -> str:
+            """Get translated text via manager's translation service"""
+            return manager.t(key)
+
         control_frame = Frame(parent)
         control_frame.pack(pady=20)
 
         start_button = Button(
             control_frame,
-            text="▶️  START CLICKING",
+            text=f"▶️  {_t('start_clicking')}",
             command=on_toggle,
             bootstyle="success",
             width=30,
@@ -34,7 +39,7 @@ class MainControlButton:
         # === State label ===
         status_label = Label(
             control_frame,
-            text="⚪ READY",
+            text=f"⚪ {_t('ready').upper()}",
             font=("Segoe UI", 12, "bold"),
             bootstyle="secondary"
         )

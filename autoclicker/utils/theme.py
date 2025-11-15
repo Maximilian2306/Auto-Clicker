@@ -37,7 +37,7 @@ class ThemeManager:
             return True
         except Exception as e:
             if on_theme_applied:
-                on_theme_applied(f"❗ Error applying theme: {e}")
+                on_theme_applied(f"[!] Error applying theme: {e}")
             return False
 
 

@@ -23,3 +23,18 @@ class BaseTab(ttkb.Frame):
     def _build_content(self):
         """Builds content"""
         raise NotImplementedError("Subclasses must implement _build_content()")
+
+    def _t(self, key: str) -> str:
+        """
+        Shorthand for getting translated text via manager's translation service
+
+        MVC-compliant: View → Controller (Manager) → Model
+        This maintains clean separation of concerns.
+
+        Args:
+            key: Translation key
+
+        Returns:
+            Translated text
+        """
+        return self.manager.t(key)

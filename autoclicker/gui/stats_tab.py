@@ -53,34 +53,39 @@ class StatsTab(BaseTab):
         scroll_frame.pack(fill="both", expand=True, padx=20, pady=20)
 
         # === Live Statistics ===
-        live_card = Card.create(scroll_frame, "Live Statistics", "info", geometry="pack", fill="x", pady=10)
+        self.live_card = Card.create(scroll_frame, f"  {self._t('live_statistics')}  ", "info", geometry="pack", fill="x", pady=10)
+        live_card = self.live_card
 
         stats_grid = Frame(live_card)
         stats_grid.pack(fill="x", pady=10)
 
         # === Stat displays ===
         stats = [
-            ("Session Time", self.manager.state["session_time"], "⏱️"),
-            ("Total Clicks", self.manager.state["total_clicks"], "🧮"),
-            ("Click Rate", self.manager.state["click_rate"], "📈"),
+            (self._t("session_time"), self.manager.state["session_time"], "⏱️"),
+            (self._t("total_clicks"), self.manager.state["total_clicks"], "🧮"),
+            (self._t("click_rate"), self.manager.state["click_rate"], "📈"),
         ]
 
+        self.stat_labels = []
         for i, (label, var, icon) in enumerate(stats):
             stat_frame = Frame(stats_grid)
-            stat_frame.grid(row=i // 2, column=i % 2, padx=20, pady=10, sticky="w") 
+            stat_frame.grid(row=i // 2, column=i % 2, padx=20, pady=10, sticky="w")
 
-            Label(stat_frame, text=icon, font=("Segoe UI", 24)).pack(side="left", padx=5 )
+            Label(stat_frame, text=icon, font=("Segoe UI", 24)).pack(side="left", padx=5)
 
             text_frame = Frame(stat_frame)
             text_frame.pack(side="left", padx=10)
 
-            Label(text_frame, text=label, font=("Segoe UI", 9), foreground="gray").pack(anchor="w")
+            stat_label = Label(text_frame, text=label, font=("Segoe UI", 9), foreground="gray")
+            stat_label.pack(anchor="w")
+            self.stat_labels.append(stat_label)
 
             Label(text_frame, textvariable=var, font=("Segoe UI", 14, "bold")).pack(anchor="w")
 
 
         # === Progress Visualization ===
-        progress_card = Card.create(scroll_frame, "Session Progress", "success", geometry="pack", fill="x", pady=0)
+        self.progress_card = Card.create(scroll_frame, f"  {self._t('session_progress')}  ", "success", geometry="pack", fill="x", pady=0)
+        progress_card = self.progress_card
 
         self.progress_var = IntVar(value=0)
         self.progress_bar = Progressbar(
@@ -92,25 +97,28 @@ class StatsTab(BaseTab):
         )
         self.progress_bar.pack(pady=10)
 
-        self.progress_label = Label(progress_card, text="Ready to start", font=("Segoe UI", 10))
+        self.progress_label = Label(progress_card, text=self._t('ready_to_start'), font=("Segoe UI", 10))
         self.progress_label.pack(pady=5)
 
         # === History/Log ===
-        history_card = Card.create(scroll_frame, "Session History", "warning", geometry="pack", fill="x", pady=10)
+        self.history_card = Card.create(scroll_frame, f"  {self._t('session_history')}  ", "warning", geometry="pack", fill="x", pady=10)
+        history_card = self.history_card
 
-        Button(
+        self.export_button = Button(
             history_card,
-            text="📊 Export Statistics",
+            text=f"📊 {self._t('export_statistics')}",
             command=self.on_export_stats,
             bootstyle="warning-outline",
-        ).pack(pady=5)
+        )
+        self.export_button.pack(pady=5)
 
-        Button(
+        self.reset_button = Button(
             history_card,
-            text="🔄 Reset Statistics",
+            text=f"🔄 {self._t('reset_statistics')}",
             command=self.on_reset_stats,
             bootstyle="danger-outline",
-        ).pack(pady=5)
+        )
+        self.reset_button.pack(pady=5)
 
     def update_progress(self, value: int, text: str) -> None:
         """
@@ -132,3 +140,35 @@ class StatsTab(BaseTab):
             style = "success-striped"
 
         self.progress_bar.configure(bootstyle=style)
+
+    def refresh_translations(self):
+        """Refresh all translatable UI elements when language changes"""
+        # Update card titles
+        if hasattr(self, 'live_card'):
+            self.live_card.config(text=f"  {self._t('live_statistics')}  ")
+
+        if hasattr(self, 'progress_card'):
+            self.progress_card.config(text=f"  {self._t('session_progress')}  ")
+
+        if hasattr(self, 'history_card'):
+            self.history_card.config(text=f"  {self._t('session_history')}  ")
+
+        # Update stat labels (session_time, total_clicks, click_rate)
+        if hasattr(self, 'stat_labels') and len(self.stat_labels) == 3:
+            self.stat_labels[0].config(text=self._t('session_time'))
+            self.stat_labels[1].config(text=self._t('total_clicks'))
+            self.stat_labels[2].config(text=self._t('click_rate'))
+
+        # Update progress label if it's showing "ready_to_start"
+        if hasattr(self, 'progress_label'):
+            current = self.progress_label.cget('text')
+            if 'ready' in current.lower() or 'bereit' in current.lower():
+                self.progress_label.config(text=self._t('ready_to_start'))
+
+        # Update export button
+        if hasattr(self, 'export_button'):
+            self.export_button.config(text=f"📊 {self._t('export_statistics')}")
+
+        # Update reset button
+        if hasattr(self, 'reset_button'):
+            self.reset_button.config(text=f"🔄 {self._t('reset_statistics')}")

@@ -16,18 +16,18 @@ def main():
     
     # === Initialize Model ===
     model = ApplicationModel()
-    print("✓ ApplicationModel initialized")
-    
+    print("[OK] ApplicationModel initialized")
+
     # === Initialize GUI Manager ===
     gui = GUIManager(model)
-    print("✓ GUIManager initialized")
-    
+    print("[OK] GUIManager initialized")
+
     # === Start stats updater ===
     model.start_stats_updater()
-    print("✓ Stats updater started")
-    
+    print("[OK] Stats updater started")
+
     # === Start Application ===
-    print("✓ Starting Application...")
+    print("[OK] Starting Application...")
     gui.run()
 
 

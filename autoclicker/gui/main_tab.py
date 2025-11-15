@@ -65,13 +65,15 @@ class MainTab(BaseTab):
         top_frame.columnconfigure(1, weight=1)
 
         # === Click Settings Card ===
-        click_card = Card.create(top_frame, "Click Configuration", "primary", geometry="grid", row=0, column=0, sticky="nsew", padx=(10, 0))
+        self.click_card = Card.create(top_frame, f"  {self._t('click_configuration')}  ", "primary", geometry="grid", row=0, column=0, sticky="nsew", padx=(10, 0))
+        click_card = self.click_card
 
         input_frame = Frame(click_card)
         input_frame.pack(fill="x", pady=10)
 
         # === Delay Slider ===
-        Label(input_frame, text="⏱️ Click Delay:", font=("Segoe UI", 10)).grid(row=0, column=0, sticky="w", padx=5)
+        self.delay_label_text = Label(input_frame, text=f"⏱️ {self._t('click_delay')}:", font=("Segoe UI", 10))
+        self.delay_label_text.grid(row=0, column=0, sticky="w", padx=5)
 
         delay_frame = Frame(input_frame)
         delay_frame.grid(row=0, column=1, columnspan=2, padx=5, sticky="ew")
@@ -92,7 +94,8 @@ class MainTab(BaseTab):
         delay_slider.configure(command=lambda v: self.delay_label.config(text=f"{float(v):.2f}s"))
 
         # === Duration Input ===
-        Label(input_frame, text="⏳ Duration:", font=("Segoe UI", 10)).grid(row=1, column=0, sticky="w", padx=5, pady=5)
+        self.duration_label_text = Label(input_frame, text=f"⏳ {self._t('duration')}:", font=("Segoe UI", 10))
+        self.duration_label_text.grid(row=1, column=0, sticky="w", padx=5, pady=5)
         duration_spin = Spinbox(
             input_frame,
             from_=0,
@@ -102,105 +105,118 @@ class MainTab(BaseTab):
             width=10,
         )
         duration_spin.grid(row=1, column=1, padx=5, pady=5)
-        Label(input_frame, text="seconds (0 = ∞)").grid(row=1, column=2, sticky="w")
+        self.seconds_infinite_label = Label(input_frame, text=self._t('seconds_zero_infinite'))
+        self.seconds_infinite_label.grid(row=1, column=2, sticky="w")
 
 
         # === Advanced Click Options ===
-        adv_card = Card.create(top_frame, "Advanced Click Options", "warning", geometry="grid", row=0, column=1, sticky="nsew", padx=(10, 0))
+        self.adv_card = Card.create(top_frame, f"  {self._t('advanced_click_options')}  ", "warning", geometry="grid", row=0, column=1, sticky="nsew", padx=(10, 0))
+        adv_card = self.adv_card
 
         rep_frame = Frame(adv_card)
         rep_frame.pack(fill="x", pady=5)
 
-        Label(rep_frame, text="🔁 Repeat clicks:").pack(side="left", padx=5)
+        self.repeat_clicks_label = Label(rep_frame, text=f"🔁 {self._t('repeat_clicks')}:")
+        self.repeat_clicks_label.pack(side="left", padx=5)
         self.repeat_var = IntVar(value=1)
-        Spinbox(rep_frame, 
+        Spinbox(rep_frame,
                 from_=0,
-                to=1000, 
+                to=1000,
                 textvariable=self.repeat_var,
-                width=10, 
+                width=10,
                 bootstyle="warning"
         ).pack(side="left", padx=5)
-        Label(rep_frame, text="times per interval").pack(side="left")
+        self.times_per_interval_label = Label(rep_frame, text=self._t('times_per_interval'))
+        self.times_per_interval_label.pack(side="left")
 
         # === Random delay ===
         self.random_delay_var = BooleanVar(value=False)
         rand_frame = Frame(adv_card)
         rand_frame.pack(fill="x", pady=5)
 
-        Checkbutton(rand_frame, 
-                    text="🎲 Add random delay (±20%)",
+        self.random_delay_check = Checkbutton(rand_frame,
+                    text=f"🎲 {self._t('add_random_delay')}",
                     variable=self.random_delay_var,
                     bootstyle="warning-round-toggle"
-        ).pack(side="left", padx=5)
+        )
+        self.random_delay_check.pack(side="left", padx=5)
 
         # === Notify click option ===
         self.notify_var = BooleanVar(value=False)
         notify_frame = Frame(adv_card)
         notify_frame.pack(fill="x", pady=5)
 
-        Checkbutton(
+        self.notify_check = Checkbutton(
             notify_frame,
-            text="🔔 Notify when done",
+            text=f"🔔 {self._t('notify_when_done')}",
             variable=self.notify_var,
             bootstyle="warning-round-toggle"
-        ).pack(side="left", padx=5)
+        )
+        self.notify_check.pack(side="left", padx=5)
 
 
         # === Click Type Selection ===
-        click_type_frame = LabelFrame(
-            scroll_frame, text=" Click Type ", padding=10, bootstyle="primary"
+        self.click_type_frame = LabelFrame(
+            scroll_frame, text=f" {self._t('click_type')} ", padding=10, bootstyle="primary"
         )
-        click_type_frame.pack(fill="x", padx=10, pady=(10,10))
+        self.click_type_frame.pack(fill="x", padx=10, pady=(10,10))
 
         click_types = [
-            ("🖱️ Left Click", "left"),
-            ("🖱️ Right Click", "right"),
-            ("🖱️ Middle Click", "middle"),
-            ("🖱️ Double Click", "double"),
+            (f"🖱️ {self._t('left_click')}", "left"),
+            (f"🖱️ {self._t('right_click')}", "right"),
+            (f"🖱️ {self._t('middle_click')}", "middle"),
+            (f"🖱️ {self._t('double_click')}", "double"),
         ]
 
+        self.click_type_radios = []
         for i, (text, value) in enumerate(click_types):
-            Radiobutton(
-                click_type_frame,
+            rb = Radiobutton(
+                self.click_type_frame,
                 text=text,
                 variable=self.click_type_var,
                 value=value,
                 bootstyle="primary-outline-toolbutton",
-            ).grid(row=0, column=i, padx=10, pady=5)
+            )
+            rb.grid(row=0, column=i, padx=10, pady=5)
+            self.click_type_radios.append((rb, value))
 
         # === Position Settings Card ===
-        pos_card = Card.create(scroll_frame, "Position Settings", "info", geometry="pack", fill="x", pady=10, padx=10)
+        self.pos_card = Card.create(scroll_frame, f"  {self._t('position_settings')}  ", "info", geometry="pack", fill="x", pady=10, padx=10)
+        pos_card = self.pos_card
 
         pos_frame = Frame(pos_card)
         pos_frame.pack(fill="x", pady=10)
 
-        Label(pos_frame, text="📍 Fixed Position:").grid(
-            row=0, column=0, sticky="w", padx=5
-        )
+        self.fixed_position_label = Label(pos_frame, text=f"📍 {self._t('fixed_position')}:")
+        self.fixed_position_label.grid(row=0, column=0, sticky="w", padx=5)
 
         coord_frame = Frame(pos_frame)
         coord_frame.grid(row=0, column=1, columnspan=3, padx=5)
 
-        Label(coord_frame, text="X:").pack(side="left", padx=2)
+        self.x_coord_label = Label(coord_frame, text=self._t('x_label'))
+        self.x_coord_label.pack(side="left", padx=2)
         self.x_entry = Entry(coord_frame, width=8, bootstyle="info")
         self.x_entry.pack(side="left", padx=2)
 
-        Label(coord_frame, text="Y:").pack(side="left", padx=5)
+        self.y_coord_label = Label(coord_frame, text=self._t('y_label'))
+        self.y_coord_label.pack(side="left", padx=5)
         self.y_entry = Entry(coord_frame, width=8, bootstyle="info")
         self.y_entry.pack(side="left", padx=2)
 
-        Button(
+        self.capture_button = Button(
             coord_frame,
-            text="🎯 Capture",
+            text=f"🎯 {self._t('capture')}",
             command=self.on_capture_coordinates,
             bootstyle="info",
             width=10,
-        ).pack(side="left", padx=10)
+        )
+        self.capture_button.pack(side="left", padx=10)
 
         # === Main Control Button ===
         _, self.start_button, self.status_label = MainControlButton.create(
             parent=scroll_frame,
             on_toggle=self.on_toggle_clicker,
+            manager=self.manager,
         )
 
     def update_delay_label(self) -> None:
@@ -213,3 +229,74 @@ class MainTab(BaseTab):
             self.delay_label.configure(text=f"{self.delay_var.get():.2f}s")
         except Exception:
             pass
+
+    def refresh_translations(self):
+        """Refresh all translatable UI elements when language changes"""
+        # Update card titles
+        if hasattr(self, 'click_card'):
+            self.click_card.config(text=f"  {self._t('click_configuration')}  ")
+
+        if hasattr(self, 'adv_card'):
+            self.adv_card.config(text=f"  {self._t('advanced_click_options')}  ")
+
+        if hasattr(self, 'pos_card'):
+            self.pos_card.config(text=f"  {self._t('position_settings')}  ")
+
+        # Update all labels with translations
+        if hasattr(self, 'delay_label_text'):
+            self.delay_label_text.config(text=f"⏱️ {self._t('click_delay')}:")
+
+        if hasattr(self, 'duration_label_text'):
+            self.duration_label_text.config(text=f"⏳ {self._t('duration')}:")
+
+        if hasattr(self, 'seconds_infinite_label'):
+            self.seconds_infinite_label.config(text=self._t('seconds_zero_infinite'))
+
+        if hasattr(self, 'repeat_clicks_label'):
+            self.repeat_clicks_label.config(text=f"🔁 {self._t('repeat_clicks')}:")
+
+        if hasattr(self, 'times_per_interval_label'):
+            self.times_per_interval_label.config(text=self._t('times_per_interval'))
+
+        if hasattr(self, 'random_delay_check'):
+            self.random_delay_check.config(text=f"🎲 {self._t('add_random_delay')}")
+
+        if hasattr(self, 'notify_check'):
+            self.notify_check.config(text=f"🔔 {self._t('notify_when_done')}")
+
+        # Update click type LabelFrame
+        if hasattr(self, 'click_type_frame'):
+            self.click_type_frame.config(text=f" {self._t('click_type')} ")
+
+        # Update radio buttons with emoji prefix
+        if hasattr(self, 'click_type_radios'):
+            click_types = ['left_click', 'right_click', 'middle_click', 'double_click']
+            for i, (rb, value) in enumerate(self.click_type_radios):
+                if i < len(click_types):
+                    rb.config(text=f"🖱️ {self._t(click_types[i])}")
+
+        if hasattr(self, 'fixed_position_label'):
+            self.fixed_position_label.config(text=f"📍 {self._t('fixed_position')}:")
+
+        if hasattr(self, 'x_coord_label'):
+            self.x_coord_label.config(text=self._t('x_label'))
+
+        if hasattr(self, 'y_coord_label'):
+            self.y_coord_label.config(text=self._t('y_label'))
+
+        if hasattr(self, 'capture_button'):
+            self.capture_button.config(text=f"🎯 {self._t('capture')}")
+
+        # Update main control button - check current state first
+        if hasattr(self, 'start_button'):
+            current_text = self.start_button.cget('text')
+            if 'START' in current_text.upper() or 'STARTEN' in current_text.upper() or 'INICIAR' in current_text.upper() or 'DÉMARRER' in current_text.upper():
+                self.start_button.config(text=f"▶️  {self._t('start_clicking')}")
+            else:
+                self.start_button.config(text=f"⏸️  {self._t('stop_clicking')}")
+
+        # Update status label - only if showing READY state
+        if hasattr(self, 'status_label'):
+            current_status = self.status_label.cget('text')
+            if 'READY' in current_status or 'BEREIT' in current_status or 'LISTO' in current_status or 'PRÊT' in current_status:
+                self.status_label.config(text=f"⚪ {self._t('ready').upper()}")
