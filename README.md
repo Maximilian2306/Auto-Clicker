@@ -3,7 +3,7 @@
 Little auto clicker tool made in python 
 
 
-<!-- 
+
 
 <div class="border border-border rounded-lg bg-background p-6 shadow-sm"><div class="prose prose-sm md:prose-base lg:prose-lg max-w-none prose-headings:font-bold prose-a:text-blue-600" style="user-select: none;"><div id="top" class="">
 
@@ -86,4 +86,3 @@ Little auto clicker tool made in python
 <div align="left" class=""><a href="#top">⬆ Return</a></div>
 <hr></div></div></div>
 
- -->
