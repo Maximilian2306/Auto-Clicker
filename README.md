@@ -73,15 +73,31 @@ Little auto clicker tool made in python
 <pre><code class="language-sh">❯ pip install -r requirements.txt
 </code></pre>
 <h3>Usage</h3>
+
+<h4>For Users (No Python Required)</h4>
+<p>Download the latest release:</p>
+<ol>
+<li class="my-0">Go to <a href="https://github.com/Maximilian2306/Auto-Clicker/releases">Releases</a></li>
+<li class="my-0">Download <code>AutoClicker.exe</code> or <code>AutoClicker-Windows.zip</code></li>
+<li class="my-0">Run <code>AutoClicker.exe</code> - no installation needed!</li>
+</ol>
+
+<p><strong>Note:</strong> Windows Defender may show a warning (expected for unsigned executables). Add an exception if needed.</p>
+
+<h4>For Developers (Running from Source)</h4>
 <p>Run the project with:</p>
-<p><strong>Using <a href="https://pypi.org/project/pip/">pip</a>:</strong></p>
-<pre><code class="language-sh">python {entrypoint}
+<pre><code class="language-sh">❯ python autoclicker.py
 </code></pre>
-<h3>Testing</h3>
-<p>Auto-clicker uses the {<strong>test_framework</strong>} test framework. Run the test suite with:</p>
-<p><strong>Using <a href="https://pypi.org/project/pip/">pip</a>:</strong></p>
-<pre><code class="language-sh">pytest
-</code></pre>
+
+<h4>Hotkeys</h4>
+<ul class="list-disc pl-4 my-0">
+<li class="my-0"><strong>F6</strong> - Start/Stop Auto-Clicker</li>
+<li class="my-0"><strong>F7</strong> - Capture Coordinates</li>
+<li class="my-0"><strong>F3</strong> - Start Macro Recording</li>
+<li class="my-0"><strong>F4</strong> - Stop Macro Recording</li>
+<li class="my-0"><strong>F5</strong> - Play Macro</li>
+<li class="my-0"><strong>ESC</strong> - Exit Application</li>
+</ul>
 <hr>
 <div align="left" class=""><a href="#top">⬆ Return</a></div>
 <hr></div></div></div>

@@ -2,6 +2,9 @@
 """
 Hotkey Setup Logic - Global keyboard shortcuts
 
+This module handles global hotkey registration and management.
+It uses event codes to communicate state changes to the Model layer,
+keeping the logic layer independent of UI concerns.
 """
 
 from typing import Callable, Dict
@@ -10,6 +13,8 @@ try:
     import keyboard
 except ImportError:
     keyboard = None
+
+from ..events import (HOTKEY_REGISTERED, HOTKEY_REGISTER_ERROR, HOTKEY_UNKNOWN, HOTKEY_NO_CALLBACK)
 
 
 class SetupHotkeys:
@@ -36,16 +41,16 @@ class SetupHotkeys:
         """Register a hotkey"""
 
         if not keyboard:
-            on_status("❌ Keyboard library not available")
+            on_status(HOTKEY_REGISTER_ERROR)
             return False
-        
+
         # key = key.strip().lower()
         original_key = key.strip()        # für UI-Anzeige
         normalized_key = original_key.lower()  # für keyboard
-        
+
         # === Check if hotkey already in use ===
         if any(existing_key.lower() == normalized_key for n, existing_key in self.hotkeys.items() if n != name):
-            on_status(f"⚠️  Hotkey [{original_key}] wird bereits verwendet!")
+            on_status(HOTKEY_REGISTER_ERROR)
             return False
 
         try:
@@ -65,7 +70,7 @@ class SetupHotkeys:
             return True
 
         except Exception as e:
-            on_status(f"❌ Error setting hotkey: {e}")
+            on_status(HOTKEY_REGISTER_ERROR)
             return False
 
     def unregister_hotkey(self, name: str) -> bool:

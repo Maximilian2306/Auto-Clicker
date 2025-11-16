@@ -2,6 +2,9 @@
 """
 Coordinate Capture Logic - Capture mouse coordinates on click
 
+This module handles coordinate capturing functionality.
+It uses event codes to communicate state changes to the Model layer,
+keeping the logic layer independent of UI concerns.
 """
 
 import threading
@@ -11,6 +14,8 @@ try:
     import mouse
 except ImportError:
     mouse = None
+
+from ..events import (CAPTURE_READY, CAPTURE_LISTENING, CAPTURE_SUCCESS, CAPTURE_ERROR)
 
 
 class CaptureCoordinates:
@@ -25,17 +30,17 @@ class CaptureCoordinates:
         on_status: Callable[[str], None],
     ):
         """Listen for next mouse click and capture coordinates"""
-        
+
         if not mouse:
-            on_status("❌ Mouse library not available")
+            on_status(CAPTURE_ERROR)
             return
 
         if self.listening:
-            on_status("⚠️ Already listening for click")
+            on_status(CAPTURE_READY)
             return
 
         self.listening = True
-        on_status("🎯 Click anywhere to capture coordinates...")
+        on_status(CAPTURE_LISTENING)
 
         def wait_for_click():
             """Run in separate thread"""
@@ -44,7 +49,7 @@ class CaptureCoordinates:
                 if isinstance(event, mouse.ButtonEvent) and event.event_type == "down":  # Only on mouse down
                     x, y = mouse.get_position()
                     on_captured(x, y)
-                    on_status(f"📍 Captured: {x}, {y}")
+                    # on_status(CAPTURE_SUCCESS)
                     mouse.unhook(on_click)
                     self.listening = False
 
