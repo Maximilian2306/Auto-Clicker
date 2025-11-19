@@ -44,9 +44,8 @@ class SetupHotkeys:
             on_status(HOTKEY_REGISTER_ERROR)
             return False
 
-        # key = key.strip().lower()
-        original_key = key.strip()        # für UI-Anzeige
-        normalized_key = original_key.lower()  # für keyboard
+        original_key = key.strip()      
+        normalized_key = original_key.lower() 
 
         # === Check if hotkey already in use ===
         if any(existing_key.lower() == normalized_key for n, existing_key in self.hotkeys.items() if n != name):
@@ -84,7 +83,7 @@ class SetupHotkeys:
                 key = self.hotkeys.get(name)
                 if key:
                     try:
-                        keyboard.remove_hotkey(key.lower())  # 🔧 normalize before removing
+                        keyboard.remove_hotkey(key.lower())  
                     except KeyError:
                         pass
             del self.registered_hotkeys[name]
@@ -146,7 +145,6 @@ class SetupHotkeys:
     def get_all_hotkeys(self) -> Dict[str, str]:
         """Get all hotkey mappings"""
         return self.hotkeys.copy()
-        # return {name: key.upper() for name, key in self.hotkeys.items()}
 
     def cleanup(self):
         """Clean up all registered hotkeys"""

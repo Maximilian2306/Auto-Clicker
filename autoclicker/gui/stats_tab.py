@@ -37,7 +37,11 @@ class StatsTab(BaseTab):
         self.on_reset_stats = on_reset_stats
 
         # === UI Variables ===
+        # MVC-REFACTOR: StringVar-based UI control
         self.progress_var = IntVar(value=0)
+        self.progress_label_var = StringVar(value="")  # Controls progress label text
+        self.progress_style_var = StringVar(value="success-striped")  # Controls progress bar style
+
         self.progress_bar = None
         self.progress_label = None
 
@@ -87,18 +91,23 @@ class StatsTab(BaseTab):
         self.progress_card = Card.create(scroll_frame, f"  {self._t('session_progress')}  ", "success", geometry="pack", fill="x", pady=0)
         progress_card = self.progress_card
 
-        self.progress_var = IntVar(value=0)
+        # MVC-REFACTOR: Progress bar uses IntVar for value, style controlled via trace
         self.progress_bar = Progressbar(
             progress_card,
             variable=self.progress_var,
             maximum=100,
-            bootstyle="success-striped",
+            bootstyle=self.progress_style_var.get(),
             length=400,
         )
         self.progress_bar.pack(pady=10)
 
-        self.progress_label = Label(progress_card, text=self._t('ready_to_start'), font=("Segoe UI", 10))
+        # MVC-REFACTOR: Progress label uses StringVar (textvariable)
+        self.progress_label_var.set(self._t('ready_to_start'))
+        self.progress_label = Label(progress_card, textvariable=self.progress_label_var, font=("Segoe UI", 10))
         self.progress_label.pack(pady=5)
+
+        # MVC-REFACTOR: Automatic style update when progress_style_var changes
+        self.progress_style_var.trace_add("write", self._on_progress_style_changed)
 
         # === History/Log ===
         self.history_card = Card.create(scroll_frame, f"  {self._t('session_history')}  ", "warning", geometry="pack", fill="x", pady=10)
@@ -120,6 +129,16 @@ class StatsTab(BaseTab):
         )
         self.reset_button.pack(pady=5)
 
+    def _on_progress_style_changed(self, *_):
+        """
+        Callback when progress_style_var changes (MVC-REFACTOR)
+
+        Automatically updates progress bar style when StringVar is modified.
+        This eliminates the need for external widget manipulation.
+        """
+        if self.progress_bar:
+            self.progress_bar.configure(bootstyle=self.progress_style_var.get())
+
     def update_progress(self, value: int, text: str) -> None:
         """
         Update the progress bar with dynamic styling based on completion percentage
@@ -128,10 +147,11 @@ class StatsTab(BaseTab):
             value: Progress percentage (0-100)
             text: Status text to display below progress bar
         """
+        # MVC-REFACTOR: Use StringVars instead of direct widget manipulation
         self.progress_var.set(value)
-        self.progress_label.config(text=text)
+        self.progress_label_var.set(text)
 
-        # Dynamic Color
+        # Dynamic Color - set StringVar to trigger automatic style update
         if value < 20:
             style = "danger-striped"
         elif value < 60:
@@ -139,7 +159,11 @@ class StatsTab(BaseTab):
         else:
             style = "success-striped"
 
-        self.progress_bar.configure(bootstyle=style)
+        self.progress_style_var.set(style)  # Triggers _on_progress_style_changed via trace_add
+
+        # MVC-REFACTOR: OLD CODE (direct widget manipulation)
+        # self.progress_label.config(text=text)
+        # self.progress_bar.configure(bootstyle=style)
 
     def refresh_translations(self):
         """Refresh all translatable UI elements when language changes"""
@@ -159,11 +183,17 @@ class StatsTab(BaseTab):
             self.stat_labels[1].config(text=self._t('total_clicks'))
             self.stat_labels[2].config(text=self._t('click_rate'))
 
-        # Update progress label if it's showing "ready_to_start"
-        if hasattr(self, 'progress_label'):
-            current = self.progress_label.cget('text')
-            if 'ready' in current.lower() or 'bereit' in current.lower():
-                self.progress_label.config(text=self._t('ready_to_start'))
+        # MVC-REFACTOR: Update progress label via StringVar if showing "ready_to_start"
+        if hasattr(self, 'progress_label_var'):
+            current = self.progress_label_var.get()
+            if 'ready' in current.lower() or 'bereit' in current.lower() or 'prêt' in current.lower() or 'listo' in current.lower():
+                self.progress_label_var.set(self._t('ready_to_start'))
+
+        # MVC-REFACTOR: OLD CODE (direct widget manipulation)
+        # if hasattr(self, 'progress_label'):
+        #     current = self.progress_label.cget('text')
+        #     if 'ready' in current.lower() or 'bereit' in current.lower():
+        #         self.progress_label.config(text=self._t('ready_to_start'))
 
         # Update export button
         if hasattr(self, 'export_button'):

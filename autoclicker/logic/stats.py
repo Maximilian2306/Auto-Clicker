@@ -97,23 +97,3 @@ class Stats:
             print(f"Error exporting stats: {e}")
             return False
 
-
-
-    # === UNUSED - Phase 4.4 Redundancy Analysis ===
-    # Wird derzeit nich verwendet vielleicht findet sich noch eine Anwendungsmöglichkeit
-    # def get_stats_dict(
-    #     self,
-    #     total_clicks: int,
-    #     session_time_str: str,
-    #     click_rate_str: str,
-    #     profile_name: str,
-    # ) -> dict:
-    #     """Get statistics as dictionary"""
-    #
-    #     return {
-    #         "date": datetime.now().isoformat(),
-    #         "total_clicks": total_clicks,
-    #         "session_time": session_time_str,
-    #         "click_rate": click_rate_str,
-    #         "profile_name": profile_name,
-    #     }
