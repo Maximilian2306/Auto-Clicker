@@ -1,26 +1,33 @@
-# status_bar.py
-import ttkbootstrap as ttkb
+# autoclicker/gui/status_bar.py
+"""
+StatusBar Component - Bottom status bar with connection status, profile, and version
+"""
+
 from ttkbootstrap.widgets import Frame, Label, Separator
 
+from .base_tab import BaseComponent
 
-class StatusBar:
+
+class StatusBar(BaseComponent):
     """Bottom status bar component"""
 
-    def __init__(self, manager, parent):
-        self.manager = manager
-        self.parent = parent
+    def __init__(self, parent, manager):
+        """
+        Initialize StatusBar component
+
+        Args:
+            parent: Parent Tkinter widget
+            manager: GUIManager instance for accessing shared state
+        """
         self.status_text_label = None
         self.connected_label = None
         self.version_label = None
-        self._build()
+        self._is_ready_state = True  # Track if showing "ready" state
 
-    def _t(self, key: str) -> str:
-        """Get translated text via manager's translation service"""
-        return self.manager.t(key)
+        super().__init__(parent, manager)
 
-    def _build(self):
-        """Builds content"""
-
+    def _build_content(self):
+        """Build the status bar UI content"""
         status_bar = Frame(self.parent, padding=10)
         status_bar.pack(side="bottom", fill="x")
 
@@ -63,21 +70,28 @@ class StatusBar:
         )
         self.version_label.pack(side="right", padx=10)
 
-    def update_text(self, message: str):
-        """Update status bar text"""
+    def update_text(self, message: str, is_ready: bool = False):
+        """
+        Update status bar text
+
+        Args:
+            message: Status message to display
+            is_ready: Whether this is the "ready" state (for translation refresh)
+        """
         if self.status_text_label:
             self.status_text_label.config(text=message)
+            self._is_ready_state = is_ready
 
     def refresh_translations(self):
         """Refresh all translatable UI elements when language changes"""
-        if hasattr(self, 'connected_label') and self.connected_label:
+        # Update connected label
+        if self.connected_label:
             self.connected_label.config(text=f"🟢 {self._t('connected')}")
 
-        if hasattr(self, 'version_label') and self.version_label:
+        # Update version label
+        if self.version_label:
             self.version_label.config(text=self._t('version'))
 
-        # Update status text only if it's still showing "Ready"
-        if hasattr(self, 'status_text_label') and self.status_text_label:
-            current = self.status_text_label.cget('text')
-            if 'ready' in current.lower() or 'bereit' in current.lower():
-                self.status_text_label.config(text=self._t('ready'))
+        # Update status text only if it's still showing "Ready" state
+        if self.status_text_label and self._is_ready_state:
+            self.status_text_label.config(text=self._t('ready'))
