@@ -1,8 +1,5 @@
-# autoclicker/gui/main_tab.py
-"""
-Main Controls Tab - UI for main clicker configuration and controls
-
-"""
+# autoclicker/gui/components/main_tab.py
+"""Main Controls Tab - Clicker configuration and controls"""
 
 import ttkbootstrap as ttkb
 from ttkbootstrap.widgets import (Frame, Label, Entry, Radiobutton, Checkbutton, LabelFrame, Scale, Spinbox, Button)
@@ -25,15 +22,6 @@ class MainTab(BaseTab):
         on_toggle_clicker: Callable[[], None],
         on_capture_coordinates: Callable[[], None],
     ):
-        """
-        Initialize MainTab with clicker controls and configuration
-
-        Args:
-            parent: Parent Tkinter widget
-            manager: GUIManager instance for accessing shared state
-            on_toggle_clicker: Callback function to toggle clicker on/off
-            on_capture_coordinates: Callback function to capture mouse coordinates
-        """
         self.on_toggle_clicker = on_toggle_clicker
         self.on_capture_coordinates = on_capture_coordinates
 
@@ -42,17 +30,16 @@ class MainTab(BaseTab):
         self.duration_var = IntVar(value=0)
         self.click_type_var = StringVar(value="left")
 
-        # === MVC-REFACTOR: UI State Variables (replaces direct widget manipulation) ===
-        # These variables are controlled by GUIManager, allowing clean separation
+        # === Dynamic UI State Variables (only for elements that change during runtime) ===
         self.status_text_var = StringVar(value=f"⚪ {manager.t('ready').upper()}")
         self.button_text_var = StringVar(value=f"▶️  {manager.t('start_clicking')}")
-        self.button_style_var = StringVar(value="success")
         self.delay_label_var = StringVar(value="0.01s")
 
         self.x_entry = None
         self.y_entry = None
         self.start_button = None
         self.status_label = None
+        self.capture_button = None
 
         super().__init__(parent, manager)
 
@@ -60,11 +47,7 @@ class MainTab(BaseTab):
         self.delay_var.trace_add("write", self._on_delay_changed)
 
     def _build_content(self) -> None:
-        """
-        Build the main tab UI content with all configuration controls
-
-        Creates click settings, advanced options, position settings, and main control button
-        """
+        """Build the main tab UI with click settings, advanced options and position controls"""
         scroll_frame = ScrolledFrame(self, autohide=True)
         scroll_frame.pack(fill="both", expand=True, padx=20, pady=20)
 
@@ -100,18 +83,12 @@ class MainTab(BaseTab):
         )
         delay_slider.pack(side="left", padx=5)
 
-        # MVC-REFACTOR: OLD CODE (direct widget manipulation via lambda)
-        # self.delay_label = Label(delay_frame, text="0.01s")
-        # self.delay_label.pack(side="left", padx=5)
-        # delay_slider.configure(command=lambda v: self.delay_label.config(text=f"{float(v):.2f}s"))
-
-        # MVC-REFACTOR: NEW CODE (uses StringVar, updated via trace_add in __init__)
         self.delay_label = Label(delay_frame, textvariable=self.delay_label_var)
         self.delay_label.pack(side="left", padx=5)
 
         # === Duration Input ===
         self.duration_label_text = Label(input_frame, text=f"⏳ {self._t('duration')}:", font=("Segoe UI", 10))
-        self.duration_label_text.grid(row=1, column=0, sticky="w", padx=5, pady=5)
+        self.duration_label_text.grid(row=1, column=0, sticky="w", padx=5, pady=25)
         duration_spin = Spinbox(
             input_frame,
             from_=0,
@@ -228,15 +205,6 @@ class MainTab(BaseTab):
         )
         self.capture_button.pack(side="left", padx=10)
 
-        # === Main Control Button ===
-        # MVC-REFACTOR: OLD CODE (returns widgets for direct manipulation)
-        # _, self.start_button, self.status_label = MainControlButton.create(
-        #     parent=scroll_frame,
-        #     on_toggle=self.on_toggle_clicker,
-        #     manager=self.manager,
-        # )
-
-        # MVC-REFACTOR: NEW CODE (uses StringVars for MVC compliance)
         _, self.start_button, self.status_label = MainControlButton.create(
             parent=scroll_frame,
             on_toggle=self.on_toggle_clicker,
@@ -246,68 +214,14 @@ class MainTab(BaseTab):
         )
 
     def _on_delay_changed(self, *args):
-        """
-        Internal callback when delay_var changes (MVC-REFACTOR)
-
-        Updates delay label automatically via StringVar.
-        Called by trace_add() registered in __init__.
-
-        Args:
-            *args: Tkinter trace callback arguments (unused)
-        """
+        """Callback when delay_var changes - updates delay label"""
         try:
             self.delay_label_var.set(f"{self.delay_var.get():.2f}s")
-        except Exception:
-            pass
-
-    # MVC-REFACTOR: OLD CODE (external method call from gui_manager)
-    # def update_delay_label(self) -> None:
-    #     """
-    #     Update the delay label to reflect current delay value
-    #
-    #     Called when loading a profile to sync the label with the slider value
-    #     """
-    #     try:
-    #         self.delay_label.configure(text=f"{self.delay_var.get():.2f}s")
-    #     except Exception:
-    #         pass
-
-    # MVC-REFACTOR: OLD CODE (external method call from gui_manager)
-    # This will be replaced by passing hotkey info during creation or using hotkey StringVars
-    # def update_hotkey_labels(self, capture_key: str = "F7", toggle_key: str = "F6") -> None:
-    #     """
-    #     Update button labels with provided hotkey bindings
-    #
-    #     Args:
-    #         capture_key: Hotkey for capture button (default: F7)
-    #         toggle_key: Hotkey for toggle clicker button (default: F6)
-    #     """
-    #     try:
-    #         # Update Capture button
-    #         self.capture_button.config(text=f"🎯 {self._t('capture')} ({capture_key.upper()})")
-    #
-    #         # Update Start/Stop button - preserve current state (START or STOP)
-    #         current_text = self.start_button.cget('text')
-    #
-    #         # Check if button shows START or STOP state
-    #         if 'START' in current_text.upper() or 'STARTEN' in current_text.upper() or 'INICIAR' in current_text.upper() or 'DÉMARRER' in current_text.upper():
-    #             self.start_button.config(text=f"▶️  {self._t('start_clicking')} ({toggle_key.upper()})")
-    #         else:
-    #             self.start_button.config(text=f"⏸️  {self._t('stop_clicking')} ({toggle_key.upper()})")
-    #     except Exception:
-    #         pass
+        except Exception as e:
+            print(f"[WARN] Failed to update delay label: {e}")
 
     def update_hotkey_labels(self, capture_key: str = "F7", toggle_key: str = "F6") -> None:
-        """
-        MVC-REFACTOR: TEMPORARY compatibility method
-
-        This method is kept temporarily for compatibility during migration.
-        Will be removed once gui_manager is updated to use StringVars.
-
-        Args:
-            capture_key: Hotkey for capture button (default: F7)
-            toggle_key: Hotkey for toggle clicker button (default: F6)
-        """
+        """Update button labels with current hotkey bindings"""
         try:
             # Update Capture button
             self.capture_button.config(text=f"🎯 {self._t('capture')} ({capture_key.upper()})")
@@ -380,14 +294,6 @@ class MainTab(BaseTab):
         # Update buttons with hotkeys
         self.update_hotkey_labels()
 
-        # MVC-REFACTOR: OLD CODE (direct widget manipulation)
-        # # Update status label - only if showing READY state
-        # if hasattr(self, 'status_label'):
-        #     current_status = self.status_label.cget('text')
-        #     if 'READY' in current_status or 'BEREIT' in current_status or 'LISTO' in current_status or 'PRÊT' in current_status:
-        #         self.status_label.config(text=f"⚪ {self._t('ready').upper()}")
-
-        # MVC-REFACTOR: NEW CODE (uses StringVar)
         # Update status label - only if showing READY state
         if hasattr(self, 'status_text_var'):
             current_status = self.status_text_var.get()

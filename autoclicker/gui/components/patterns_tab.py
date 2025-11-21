@@ -1,4 +1,4 @@
-# autoclicker/gui/patterns_tab.py
+# autoclicker/gui/components/patterns_tab.py
 """
 Patterns & Macros Tab - UI for click patterns and macro recording
 
@@ -25,16 +25,7 @@ class PatternsTab(BaseTab):
         on_stop_macro: Callable[[], None],
         on_play_macro: Callable[[], None],
     ):
-        """
-        Initialize PatternsTab with pattern controls and macro recording
-
-        Args:
-            parent: Parent Tkinter widget
-            manager: GUIManager instance for accessing shared state
-            on_record_macro: Callback function to start macro recording
-            on_stop_macro: Callback function to stop macro recording
-            on_play_macro: Callback function to playback recorded macro
-        """
+        """Initialize PatternsTab with pattern selection and macro controls"""
         self.on_record_macro = on_record_macro
         self.on_stop_macro = on_stop_macro
         self.on_play_macro = on_play_macro
@@ -65,11 +56,7 @@ class PatternsTab(BaseTab):
         self.pattern_size_var.trace_add("write", self._on_pattern_size_changed)
 
     def _build_content(self) -> None:
-        """
-        Build the patterns tab UI content with pattern selection and macro controls
-
-        Creates pattern options, behavior settings, pattern size controls, and macro buttons
-        """
+        """Build the patterns tab UI with pattern options and macro controls"""
         scroll_frame = ScrolledFrame(self, autohide=True)
         scroll_frame.pack(fill="both", expand=True, padx=20, pady=20)
 
@@ -246,38 +233,18 @@ class PatternsTab(BaseTab):
         self.macro_status.pack(pady=5)
 
     def _on_pattern_size_changed(self, *args):
-        """
-        Internal callback when pattern_size_var changes (MVC-REFACTOR)
-
-        Updates pattern size label automatically via StringVar.
-        Called by trace_add() registered in __init__.
-
-        Args:
-            *args: Tkinter trace callback arguments (unused)
-        """
+        """Callback when pattern_size_var changes - updates size label"""
         try:
             self.pattern_size_label_var.set(f"{self.pattern_size_var.get()} {self._t('pattern_size_px')}")
         except Exception:
             pass
 
     def update_macro_status(self, text: str) -> None:
-        """
-        Update the macro status label with current recording/playback state
-
-        Args:
-            text: Status message to display
-        """
+        """Update the macro status label with current recording/playback state"""
         self.macro_status_var.set(text)
 
     def update_hotkey_labels(self, record_key: str = "F3", stop_key: str = "F4", play_key: str = "F5") -> None:
-        """
-        Update macro button labels with hotkey bindings
-
-        Args:
-            record_key: Hotkey for record button (default: F3)
-            stop_key: Hotkey for stop button (default: F4)
-            play_key: Hotkey for play button (default: F5)
-        """
+        """Update macro button labels with hotkey bindings"""
         try:
             self.record_button.config(text=f"⏺️ {self._t('macro_record')} ({record_key.upper()})")
             self.stop_button.config(text=f"⏸️ {self._t('macro_stop')} ({stop_key.upper()})")
@@ -320,11 +287,6 @@ class PatternsTab(BaseTab):
         if hasattr(self, 'pattern_size_label'):
             self.pattern_size_label.config(text=f"📏 {self._t('pattern_size')}:")
 
-        # MVC-REFACTOR: OLD CODE (direct widget manipulation)
-        # if hasattr(self, 'size_label'):
-        #     self.size_label.config(text=f"{self.pattern_size_var.get()} {self._t('pattern_size_px')}")
-
-        # MVC-REFACTOR: NEW CODE (uses StringVar)
         # Update size label with current value via StringVar
         if hasattr(self, 'pattern_size_label_var'):
             self.pattern_size_label_var.set(f"{self.pattern_size_var.get()} {self._t('pattern_size_px')}")

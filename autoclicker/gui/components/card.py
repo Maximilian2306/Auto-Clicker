@@ -1,4 +1,4 @@
-# autoclicker/gui/card.py
+# autoclicker/gui/components/card.py
 import ttkbootstrap as ttkb
 from ttkbootstrap.widgets import LabelFrame
 
@@ -22,17 +22,11 @@ class Card:
 
         Parameter:
         ----------
-        parent : Widget
-            Elterncontainer
-        title : str
-            Überschrift der Card
-        style : str
-            ttkbootstrap-Stil (z. B. "primary", "info", "warning", ...)
-        geometry : str
-            Layout-Modus, "pack" oder "grid"
-        **layout_options :
-            Weitere Layout-Argumente, wie padx, pady, row, column, etc.
-
+        parent : Widget => Parent-Widget
+        title : str => Headertitle 
+        style : str => ttkbootstrap style
+        geometry : str => Layout mode (Pack or Grid)
+        **layout_options : More layout options like padx, pady, row, column, etc.
         """
         card = LabelFrame(
             parent,

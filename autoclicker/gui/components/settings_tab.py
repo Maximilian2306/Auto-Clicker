@@ -1,4 +1,4 @@
-# autoclicker/gui/settings_tab.py
+# autoclicker/gui/components/settings_tab.py
 """
 Settings Tab - UI for application settings and profile management
 
@@ -32,21 +32,7 @@ class SettingsTab(BaseTab):
         on_ask_string: Callable,
         on_get_profile_list: Callable[[], list[str]],
     ):
-        """
-        Initialize SettingsTab with profile management, theme selection, and hotkey configuration
-
-        Args:
-            parent: Parent Tkinter widget
-            manager: GUIManager instance for accessing shared state
-            on_save_profile: Callback to save current settings as profile
-            on_load_profile: Callback to load profile by name
-            on_delete_profile: Callback to delete profile by name
-            on_apply_theme: Callback to change application theme
-            available_themes: List of available theme names
-            on_set_hotkey: Callback to update hotkey binding (hotkey_name, key)
-            on_ask_string: Callback to show input dialog
-            on_get_profile_list: Callback to get list of available profiles
-        """
+        """Initialize SettingsTab with language, theme, hotkey and profile settings"""
         self.on_save_profile = on_save_profile
         self.on_load_profile = on_load_profile
         self.on_delete_profile = on_delete_profile
@@ -68,11 +54,7 @@ class SettingsTab(BaseTab):
         super().__init__(parent, manager)
 
     def _build_content(self) -> None:
-        """
-        Build the settings tab UI content with language, theme, hotkeys, and profile controls
-
-        Creates language selection, theme buttons, hotkey configuration, and profile management
-        """
+        """Build the settings tab UI with language, theme, hotkey and profile controls"""
         scroll_frame = ScrolledFrame(self, autohide=True)
         scroll_frame.pack(fill="both", expand=True, padx=20, pady=20)
 
@@ -206,11 +188,7 @@ class SettingsTab(BaseTab):
 
 
     def update_hotkey_label(self) -> None:
-        """
-        Update hotkey entry fields to reflect currently configured hotkeys
-
-        Called when loading a profile to sync UI with stored hotkey bindings
-        """
+        """Update hotkey entry fields to reflect currently configured hotkeys"""
         try:
             hotkeys = getattr(self.manager.model.hotkeys, "hotkeys", {})
 
@@ -232,11 +210,7 @@ class SettingsTab(BaseTab):
             print(f"[ERROR] update_hotkey_label failed: {e}")
 
     def _on_save_profile_dialog(self) -> None:
-        """
-        Show dialog to prompt user for profile name and save current settings
-
-        Displays input dialog and calls on_save_profile callback if user provides a name
-        """
+        """Show dialog to prompt user for profile name and save current settings"""
         profile_name = self.on_ask_string(
             title=self._t('save_profile_dialog_title'),
             prompt=self._t('save_profile_prompt'),
@@ -245,12 +219,7 @@ class SettingsTab(BaseTab):
             self.on_save_profile(profile_name)
 
     def _on_load_profile_dialog(self) -> None:
-        """
-        Show dialog to select and load a saved profile
-
-        Displays available profiles and delegates to callback
-        MVC-compliant: View only shows dialog, Controller handles validation/status
-        """
+        """Show dialog to select and load a saved profile"""
         profiles = self.on_get_profile_list()
         if profiles:
             profile_name = self.on_ask_string(
@@ -264,12 +233,7 @@ class SettingsTab(BaseTab):
             self.on_load_profile(None)
 
     def _on_delete_profile_dialog(self) -> None:
-        """
-        Show dialog to select and delete a saved profile
-
-        Displays available profiles (excluding Default) and delegates to callback
-        MVC-compliant: View only shows dialog, Controller handles validation/status
-        """
+        """Show dialog to select and delete a saved profile"""
         profiles = [p for p in self.on_get_profile_list() if p != "Default"]
         if profiles:
             profile_name = self.on_ask_string(

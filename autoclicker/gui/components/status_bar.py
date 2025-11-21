@@ -1,4 +1,4 @@
-# autoclicker/gui/status_bar.py
+# autoclicker/gui/components/status_bar.py
 """
 StatusBar Component - Bottom status bar with connection status, profile, and version
 """
@@ -12,13 +12,7 @@ class StatusBar(BaseComponent):
     """Bottom status bar component"""
 
     def __init__(self, parent, manager):
-        """
-        Initialize StatusBar component
-
-        Args:
-            parent: Parent Tkinter widget
-            manager: GUIManager instance for accessing shared state
-        """
+        """Initialize StatusBar with connection status, profile and version display"""
         self.status_text_label = None
         self.connected_label = None
         self.version_label = None
@@ -71,13 +65,7 @@ class StatusBar(BaseComponent):
         self.version_label.pack(side="right", padx=10)
 
     def update_text(self, message: str, is_ready: bool = False):
-        """
-        Update status bar text
-
-        Args:
-            message: Status message to display
-            is_ready: Whether this is the "ready" state (for translation refresh)
-        """
+        """Update status bar text with message and track ready state"""
         if self.status_text_label:
             self.status_text_label.config(text=message)
             self._is_ready_state = is_ready
