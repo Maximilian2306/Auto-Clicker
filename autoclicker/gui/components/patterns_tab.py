@@ -246,11 +246,14 @@ class PatternsTab(BaseTab):
     def update_hotkey_labels(self, record_key: str = "F3", stop_key: str = "F4", play_key: str = "F5") -> None:
         """Update macro button labels with hotkey bindings"""
         try:
-            self.record_button.config(text=f"⏺️ {self._t('macro_record')} ({record_key.upper()})")
-            self.stop_button.config(text=f"⏸️ {self._t('macro_stop')} ({stop_key.upper()})")
-            self.play_button.config(text=f"▶️ {self._t('macro_play')} ({play_key.upper()})")
-        except Exception:
-            pass
+            if self.record_button:
+                self.record_button.config(text=f"⏺️ {self._t('macro_record')} ({record_key.upper()})")
+            if self.stop_button:
+                self.stop_button.config(text=f"⏸️ {self._t('macro_stop')} ({stop_key.upper()})")
+            if self.play_button:
+                self.play_button.config(text=f"▶️ {self._t('macro_play')} ({play_key.upper()})")
+        except Exception as e:
+            print(f"[ERROR] update_hotkey_labels failed: {e}")
 
     def refresh_translations(self):
         """Refresh all translatable UI elements when language changes"""

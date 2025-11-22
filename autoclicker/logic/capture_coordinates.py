@@ -1,11 +1,5 @@
 # autoclicker/logic/capture_coordinates.py
-"""
-Coordinate Capture Logic - Capture mouse coordinates on click
-
-This module handles coordinate capturing functionality.
-It uses event codes to communicate state changes to the Model layer,
-keeping the logic layer independent of UI concerns.
-"""
+"""Coordinate Capture Logic - Capture mouse position on click"""
 
 import threading
 from typing import Callable, Optional
@@ -29,8 +23,7 @@ class CaptureCoordinates:
         on_captured: Callable[[int, int], None],
         on_status: Callable[[str], None],
     ):
-        """Listen for next mouse click and capture coordinates"""
-
+        """Listen for next click and capture coordinates"""
         if not mouse:
             on_status(CAPTURE_ERROR)
             return
@@ -43,13 +36,10 @@ class CaptureCoordinates:
         on_status(CAPTURE_LISTENING)
 
         def wait_for_click():
-            """Run in separate thread"""
-
             def on_click(event):
                 if isinstance(event, mouse.ButtonEvent) and event.event_type == "down":  # Only on mouse down
                     x, y = mouse.get_position()
                     on_captured(x, y)
-                    # on_status(CAPTURE_SUCCESS)
                     mouse.unhook(on_click)
                     self.listening = False
 
@@ -65,3 +55,4 @@ class CaptureCoordinates:
             return pyautogui.position()
         except Exception as e:
             print(f"Error getting mouse position: {e}")
+            return (0, 0)

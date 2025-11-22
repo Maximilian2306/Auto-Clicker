@@ -3,23 +3,11 @@ from ttkbootstrap.widgets import Frame, Label, Button
 
 
 class MainControlButton:
-    """
-    Creates the main start button + status display.
-
-    """
+    """Creates the main start button + status display"""
 
     @staticmethod
     def create(parent, on_toggle, manager, button_text_var, status_text_var):
-        """
-        Creates the UI for the main control area.
-
-        Args:
-            parent: The parent widget
-            on_toggle: Callback function to execute on button click
-            manager: GUIManager instance for translations
-            button_text_var: StringVar for button text (required)
-            status_text_var: StringVar for status label (required)
-        """
+        """Create the main control area with start button and status label"""
         control_frame = Frame(parent)
         control_frame.pack(pady=20)
 

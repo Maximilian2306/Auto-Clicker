@@ -224,18 +224,20 @@ class MainTab(BaseTab):
         """Update button labels with current hotkey bindings"""
         try:
             # Update Capture button
-            self.capture_button.config(text=f"🎯 {self._t('capture')} ({capture_key.upper()})")
+            if self.capture_button:
+                self.capture_button.config(text=f"🎯 {self._t('capture')} ({capture_key.upper()})")
 
             # Update Start/Stop button via StringVar
-            current_text = self.button_text_var.get()
+            if self.button_text_var:
+                current_text = self.button_text_var.get()
 
-            # Check if button shows START or STOP state
-            if 'START' in current_text.upper() or 'STARTEN' in current_text.upper() or 'INICIAR' in current_text.upper() or 'DÉMARRER' in current_text.upper():
-                self.button_text_var.set(f"▶️  {self._t('start_clicking')} ({toggle_key.upper()})")
-            else:
-                self.button_text_var.set(f"⏸️  {self._t('stop_clicking')} ({toggle_key.upper()})")
-        except Exception:
-            pass
+                # Check if button shows START or STOP state
+                if 'START' in current_text.upper() or 'STARTEN' in current_text.upper() or 'INICIAR' in current_text.upper() or 'DÉMARRER' in current_text.upper():
+                    self.button_text_var.set(f"▶️  {self._t('start_clicking')} ({toggle_key.upper()})")
+                else:
+                    self.button_text_var.set(f"⏸️  {self._t('stop_clicking')} ({toggle_key.upper()})")
+        except Exception as e:
+            print(f"[ERROR] update_hotkey_labels failed: {e}")
 
     def refresh_translations(self):
         """Refresh all translatable UI elements when language changes"""
