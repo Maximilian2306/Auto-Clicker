@@ -42,7 +42,9 @@ A Python-based mouse automation tool with a modern GUI.
 git clone https://github.com/Maximilian2306/Auto-Clicker
 cd Auto-Clicker
 
-# Install dependencies
+# Install dependencies with safe venv
+python -m venv venv
+venv\Scripts\activate
 pip install -r requirements.txt
 
 # Run
@@ -67,14 +69,22 @@ python autoclicker.py
 
 ## Building from Source
 
+### Local Build
+
 ```bash
 pip install pyinstaller
 python build.py
 ```
 
-Output: `dist/AutoClicker.exe`
+### Manual Build (alternative)
 
-See [RELEASE.md](RELEASE.md) for more details.
+```bash
+pyinstaller autoclicker.spec --clean
+```
+
+Output:
+- `dist/AutoClicker.exe` - Standalone executable
+- `dist/AutoClicker-Windows.zip` - Release package
 
 ## Project Structure
 
