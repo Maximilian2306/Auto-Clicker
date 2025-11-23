@@ -72,14 +72,14 @@ def verify_build():
     """Verify the build was successful."""
     print("[*] Verifying build...")
 
-    exe_path = Path("dist/AutoClicker.exe")
+    exe_path = Path("dist/ClickMAX.exe")
 
     if not exe_path.exists():
-        print("[ERROR] AutoClicker.exe not found in dist/")
+        print("[ERROR] ClickMAX.exe not found in dist/")
         sys.exit(1)
 
     size_mb = exe_path.stat().st_size / (1024 * 1024)
-    print(f"[OK] AutoClicker.exe created ({size_mb:.2f} MB)")
+    print(f"[OK] ClickMAX.exe created ({size_mb:.2f} MB)")
     print(f"   Location: {exe_path.absolute()}\n")
 
 
@@ -87,14 +87,14 @@ def create_zip_release():
     """Create a ZIP file for release."""
     print("[*] Creating release ZIP...")
 
-    zip_name = "AutoClicker-Windows"
+    zip_name = "ClickMAX-Windows"
 
     # Create a temporary directory with release contents
     release_dir = Path("dist/release_temp")
     release_dir.mkdir(exist_ok=True)
 
     # Copy executable
-    shutil.copy("dist/AutoClicker.exe", release_dir / "AutoClicker.exe")
+    shutil.copy("dist/ClickMAX.exe", release_dir / "ClickMAX.exe")
 
     # Copy README if it exists
     if Path("README.md").exists():
@@ -126,8 +126,8 @@ def main():
         print("Build successful!")
         print("=" * 60)
         print("\nRelease files:")
-        print("  - dist/AutoClicker.exe")
-        print("  - dist/AutoClicker-Windows.zip")
+        print("  - dist/ClickMAX.exe")
+        print("  - dist/ClickMAX-Windows.zip")
         print("\nYou can now upload these to GitHub Releases.")
 
     except KeyboardInterrupt:

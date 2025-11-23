@@ -1,4 +1,4 @@
-# Auto-Clicker
+# ClickMAX
 
 A Python-based mouse automation tool with a modern GUI.
 
@@ -30,10 +30,11 @@ A Python-based mouse automation tool with a modern GUI.
 ### For Users (No Python Required)
 
 1. Go to [Releases](https://github.com/Maximilian2306/Auto-Clicker/releases)
-2. Download `AutoClicker.exe` or `AutoClicker-Windows.zip`
-3. Run `AutoClicker.exe` - no installation needed
+2. Download `ClickMAX.exe` or `ClickMAX-Windows.zip`
+3. Run `ClickMAX.exe` - no installation needed
 
-**Note:** Windows Defender may show a warning for unsigned executables. Add an exception if needed.
+**Note:** Warning: When starting ClickMAX.exe a Red Window (Smartscreen) Will Probably Popup.
+To Run The Application You Have To Press More Info And Then Run Anyways.
 
 ### For Developers
 
@@ -55,7 +56,7 @@ python autoclicker.py
 
 | Key | Action |
 |-----|--------|
-| F6 | Start/Stop Auto-Clicker |
+| F6 | Start/Stop ClickMAX |
 | F7 | Capture Coordinates |
 | F3 | Start Macro Recording |
 | F4 | Stop Macro Recording |
@@ -83,8 +84,8 @@ pyinstaller autoclicker.spec --clean
 ```
 
 Output:
-- `dist/AutoClicker.exe` - Standalone executable
-- `dist/AutoClicker-Windows.zip` - Release package
+- `dist/ClickMAX.exe` - Standalone executable
+- `dist/ClickMAX-Windows.zip` - Release package
 
 ## Project Structure
 
