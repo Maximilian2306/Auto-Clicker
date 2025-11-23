@@ -6,7 +6,19 @@ Utils Package - Utilities not tied to GUI or Logic
 from .theme import ThemeManager
 from .show_notification import NotificationManager
 from .translation import TranslationManager
-from .validators import validate_safe_filename, validate_profile_name, validate_macro_name
+from .validators import (
+    validate_safe_filename,
+    validate_profile_name,
+    validate_macro_name,
+    validate_number,
+    validate_delay,
+    validate_duration,
+    validate_repeat,
+    validate_pattern_size,
+    validate_coordinates,
+    validate_hotkey,
+    VALID_HOTKEYS,
+)
 from .constants import (
     LANGUAGE_CODES,
     LANGUAGE_DISPLAY_NAMES,
@@ -33,6 +45,14 @@ __all__ = [
     "validate_safe_filename",
     "validate_profile_name",
     "validate_macro_name",
+    "validate_number",
+    "validate_delay",
+    "validate_duration",
+    "validate_repeat",
+    "validate_pattern_size",
+    "validate_coordinates",
+    "validate_hotkey",
+    "VALID_HOTKEYS",
     # Constants
     "LANGUAGE_CODES",
     "LANGUAGE_DISPLAY_NAMES",

@@ -1,11 +1,5 @@
 # autoclicker/logic/setup_hotkeys.py
-"""
-Hotkey Setup Logic - Global keyboard shortcuts
-
-This module handles global hotkey registration and management.
-It uses event codes to communicate state changes to the Model layer,
-keeping the logic layer independent of UI concerns.
-"""
+"""Hotkey Setup Logic - Global keyboard shortcuts"""
 
 from typing import Callable, Dict
 
@@ -58,7 +52,7 @@ class SetupHotkeys:
 
             try:
                 keyboard.remove_hotkey(normalized_key)
-            except Exception:
+            except Exception as e:
                 pass
 
             keyboard.add_hotkey(normalized_key, callback)

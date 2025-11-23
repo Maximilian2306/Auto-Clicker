@@ -1,9 +1,5 @@
 # autoclicker/utils/theme.py
-"""
-Theme Management Utility
-Handles theme cycling and application
-
-"""
+"""Theme Management Utility"""
 
 from typing import Callable, List
 
@@ -40,10 +36,8 @@ class ThemeManager:
                 on_theme_applied(f"[!] Error applying theme: {e}")
             return False
 
-
-    # Wird derzeit nich verwendet vielleicht findet sich noch eine Anwendungsmöglichkeit
     def get_current_theme(self) -> str:
-        """Get currently active theme"""
+        """Get currently active theme name"""
         if self.available_themes and self.current_theme_index < len(self.available_themes):
             return self.available_themes[self.current_theme_index]
         return None

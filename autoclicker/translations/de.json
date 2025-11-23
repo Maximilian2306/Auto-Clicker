@@ -182,7 +182,7 @@
   "delete_profile_dialog_title": "Profil löschen",
   "delete_profile_prompt": "Profilname eingeben:",
   "no_deletable_profiles": "Keine löschbaren Profile (Default ist geschützt)",
-  "auto_clicker_statistics_header": "Auto-Clicker Statistiken",
+  "auto_clicker_statistics_header": "ClickMAX Statistiken",
   "export_dialog_title": "Statistiken exportieren",
   "text_files": "Textdateien",
   "csv_files": "CSV-Dateien"
