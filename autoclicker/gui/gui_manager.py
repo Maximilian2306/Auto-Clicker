@@ -13,7 +13,7 @@ from .handlers.status_handler import StatusHandler
 from .handlers.profile_handler import ProfileHandler
 from ..model import ApplicationModel
 from ..utils.toast_notification import ToastManager
-from ..utils.constants import WINDOW_WIDTH_DEFAULT, WINDOW_HEIGHT, WINDOW_WIDTH_BY_LANGUAGE
+from ..utils.window_sizing import calculate_optimal_window_size, get_centered_geometry
 from ..utils.validators import validate_delay, validate_duration, validate_repeat, validate_coordinates
 from .. import events
 
@@ -31,16 +31,18 @@ class GUIManager:
         # === Window Setup ===
         self.root = Window(themename="cyborg")
         self.root.title("ClickMAX")
-        self.root.geometry(f"{WINDOW_WIDTH_DEFAULT}x{WINDOW_HEIGHT}")
+
+        # === Calculate window size ===
+        initial_width, initial_height = calculate_optimal_window_size(self.root, "English")
+        initial_geometry = get_centered_geometry(self.root, initial_width, initial_height)
+        self.root.geometry(initial_geometry)
         self.root.resizable(True, True)
 
         # === Set Window Icon ===
         if getattr(sys, 'frozen', False):
-            # Running as EXE
-            icon_path = Path(sys._MEIPASS) / "icon.ico"
+            icon_path = Path(sys._MEIPASS) / "icon.ico" # Running as EXE
         else:
-            # Running from source
-            icon_path = Path(__file__).parent.parent.parent / "icon.ico"
+            icon_path = Path(__file__).parent.parent.parent / "icon.ico" # Running from source
 
         if icon_path.exists():
             self.root.iconbitmap(str(icon_path))
@@ -97,32 +99,31 @@ class GUIManager:
         return self.model.translation_manager.get_text(key)
 
     def _adjust_window_size_for_language(self):
-        """Adjust window width based on current language"""
+        """Adjust window size based on current language and screen dimensions"""
         try:
             if not hasattr(self.model, 'language') or self.model.language is None:
                 return
 
             current_lang = self.model.language.get()
-            width = WINDOW_WIDTH_BY_LANGUAGE.get(current_lang, WINDOW_WIDTH_DEFAULT + 100)
-            current_geometry = self.root.geometry()  # Format: "WIDTHxHEIGHT+X+Y"
+            optimal_width, optimal_height = calculate_optimal_window_size(self.root, current_lang)
 
-            # Extract height and position
-            parts = current_geometry.split('x')
-            if len(parts) >= 2:
-                height_and_pos = parts[1]  # e.g., "785+100+50" or "785"
+            # Try to preserve current window position
+            current_geometry = self.root.geometry()
+            if '+' in current_geometry:
+                parts = current_geometry.split('+')
+                if len(parts) >= 3:
+                    try:
+                        x_pos, y_pos = int(parts[1]), int(parts[2])
+                        new_geometry = f"{optimal_width}x{optimal_height}+{x_pos}+{y_pos}"
+                    except (ValueError, IndexError):
+                        new_geometry = get_centered_geometry(self.root, optimal_width, optimal_height)
+                else:
+                    new_geometry = get_centered_geometry(self.root, optimal_width, optimal_height)
+            else:
+                new_geometry = get_centered_geometry(self.root, optimal_width, optimal_height)
 
-                # Extract just the height (in case window is not properly initialized)
-                # Height should be at least 785 to ensure proper display
-                height_str = height_and_pos.split('+')[0] if '+' in height_and_pos else height_and_pos
-                try:
-                    current_height = int(height_str)
-                    if current_height < 100:
-                        height_and_pos = height_and_pos.replace(height_str, str(WINDOW_HEIGHT), 1)
-                except ValueError:
-                    print(f"[WARN] Invalid window height: {height_str}")
+            self.root.geometry(new_geometry)
 
-                new_geometry = f"{width}x{height_and_pos}"
-                self.root.geometry(new_geometry)
         except Exception as e:
             print(f"[WARN] Failed to adjust window size: {e}")
 
@@ -176,7 +177,6 @@ class GUIManager:
             on_play_macro=self._on_play_macro,
         )
         self.notebook.add(self.patterns_tab, text="🎨 Patterns")
-        # MVC-COMPLIANT: Callback uses StringVar internally (patterns_tab.macro_status_var)
         self.model.on_macro_status_update = self.patterns_tab.update_macro_status
 
         # === Statistics Tab ===
@@ -187,7 +187,6 @@ class GUIManager:
             on_reset_stats=self._on_reset_stats,
         )
         self.notebook.add(self.stats_tab, text="📊 Statistics")
-        # MVC-COMPLIANT: Callback uses StringVars internally (progress_var, progress_label_var, progress_style_var)
         self.model.on_progress_changed = self.stats_tab.update_progress
 
         # === Settings Tab ===
