@@ -103,15 +103,17 @@ DEFAULT_LANGUAGE = "English"
 # Stats update interval in seconds
 STATS_UPDATE_INTERVAL = 1
 
-# Window dimensions
-WINDOW_WIDTH_DEFAULT = 950
-WINDOW_HEIGHT = 785
-WINDOW_WIDTH_BY_LANGUAGE = {
-    "English": 950,
-    "Deutsch": 1050,
-    "Español": 1000,
-    "Français": 1000,
-    "中文": 950,
+# Window dimensions (minimum required dimensions)
+WINDOW_WIDTH_MIN = 950
+WINDOW_HEIGHT_MIN = 785
+
+# Language-specific width multipliers
+WINDOW_WIDTH_MULTIPLIER_BY_LANGUAGE = {
+    "English": 1.0,     # 950
+    "Deutsch": 1.105,   # ~1050
+    "Español": 1.053,   # ~1000
+    "Français": 1.053,  # ~1000
+    "中文": 1.0,        # 950
 }
 
 # Animation timings (milliseconds)

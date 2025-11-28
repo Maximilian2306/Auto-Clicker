@@ -20,6 +20,7 @@ A Python-based mouse automation tool with a modern GUI.
 - **Click Automation** - Configurable click delay, duration, and button
 - **Click Patterns** - Circle, Square, Star, Spiral, Zigzag, Random, Figure-8, Line
 - **Macro Recording** - Record and replay mouse/keyboard sequences
+- **Stats Management** - Live statistics about your click session
 - **Profile Management** - Save and load different configurations
 - **Global Hotkeys** - Control the app from anywhere
 - **Multi-Language** - English, German, Spanish, French

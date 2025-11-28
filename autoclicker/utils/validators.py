@@ -53,12 +53,7 @@ def validate_number(
     allow_float: bool = True,
     name: str = "Value"
 ) -> Tuple[bool, str, Union[int, float, None]]:
-    """
-    Validate numeric input. Returns (is_valid, error_message, parsed_value).
-
-    Converts string to number if needed and validates range.
-    """
-    # Convert string to number
+    """Validate numeric input, returns (is_valid, error_message, parsed_value)"""
     if isinstance(value, str):
         value = value.strip()
         if not value:
@@ -70,7 +65,6 @@ def validate_number(
     else:
         parsed = float(value) if allow_float else int(value)
 
-    # Validate range
     if min_val is not None and parsed < min_val:
         return False, f"{name} must be at least {min_val}", None
 
@@ -132,23 +126,17 @@ VALID_HOTKEYS = {
     'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
     # Numbers
     '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-    # Modifiers (for combinations)
+    # Modifiers 
     'ctrl', 'alt', 'shift', 'win',
 }
 
 
 def validate_hotkey(key: str) -> Tuple[bool, str]:
-    """
-    Validate hotkey string. Returns (is_valid, error_message).
-
-    Supports single keys (f6, esc) and combinations (ctrl+shift+a).
-    """
+    """Validate hotkey string, supports single keys (f6, esc) and combinations (ctrl+shift+a)"""
     if not key:
         return False, "Hotkey cannot be empty"
 
     key = key.strip().lower()
-
-    # Split by + for combinations
     parts = [p.strip() for p in key.split('+')]
 
     for part in parts:

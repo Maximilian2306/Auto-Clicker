@@ -88,7 +88,7 @@ class MainTab(BaseTab):
 
         # === Duration Input ===
         self.duration_label_text = Label(input_frame, text=f"⏳ {self._t('duration')}:", font=("Segoe UI", 10))
-        self.duration_label_text.grid(row=1, column=0, sticky="w", padx=5, pady=25)
+        self.duration_label_text.grid(row=1, column=0, sticky="w", padx=5, pady=15)
         duration_spin = Spinbox(
             input_frame,
             from_=0,
