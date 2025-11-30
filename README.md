@@ -34,7 +34,7 @@ A Python-based mouse automation tool with a modern GUI.
 2. Download `ClickMAX.exe` or `ClickMAX-Windows.zip`
 3. Run `ClickMAX.exe` - no installation needed
 
-**Note:** Warning: When starting ClickMAX.exe a Red Window (Smartscreen) Will Probably Popup.
+**Note:** Warning: When starting ClickMAX.exe a Blue/Red Window (Smartscreen) Will Probably Popup.
 To Run The Application You Have To Press More Info And Then Run Anyways.
 
 ### For Developers
