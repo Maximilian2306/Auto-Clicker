@@ -9,18 +9,19 @@ from pathlib import Path
 from datetime import datetime
 
 try:
-    import mouse
-    import keyboard as kb
+    from pynput import mouse, keyboard
+    MACRO_LIBS_AVAILABLE = True
 except ImportError:
     mouse = None
-    kb = None
+    keyboard = None
+    MACRO_LIBS_AVAILABLE = False
 
 from ..events import (MACRO_RECORDING_STARTED, MACRO_RECORDING_STOPPED, MACRO_ALREADY_RECORDING, MACRO_NOT_RECORDING, MACRO_SAVED, MACRO_SAVE_ERROR, MACRO_LOADED, MACRO_LOAD_ERROR, MACRO_PLAYING, MACRO_PLAY_COMPLETED, MACRO_PLAY_ERROR, MACRO_DELETED, MACRO_DELETE_ERROR, MACRO_NO_EVENTS, MACRO_INVALID_NAME, MACRO_NOT_FOUND, MACRO_LIBS_UNAVAILABLE)
 from ..utils.validators import validate_macro_name
 from ..utils.constants import MACROS_DIR
 
 class MacroRecording:
-    """Manages macro recording and playback"""
+    """Manages macro recording and playback using pynput (cross-platform)"""
 
     def __init__(self, hotkeys: dict[str, str] = None):
         self.recording = False
@@ -34,8 +35,8 @@ class MacroRecording:
             "stop_macro_recording": "f4",
             "play_macro_recording": "f5",
         }
-        self._mouse_hook = None
-        self._keyboard_hook = None
+        self._mouse_listener = None
+        self._keyboard_listener = None
 
     def _validate_macro_name(self, name: str) -> bool:
         """Validate macro name to prevent path traversal"""
@@ -47,7 +48,7 @@ class MacroRecording:
 
     def start_recording(self, on_status: Callable[[str], None]) -> bool:
         """Start recording mouse and keyboard events"""
-        if not mouse or not kb:
+        if not MACRO_LIBS_AVAILABLE:
             on_status(MACRO_LIBS_UNAVAILABLE)
             return False
 
@@ -63,56 +64,91 @@ class MacroRecording:
         self.recording_start_time = time.time()
         on_status(MACRO_RECORDING_STARTED)
 
-        def record_events():
-            def on_mouse_event(event):
-                with self._recording_lock:
-                    if not self.recording:
-                        return
+        # Mouse event handlers
+        def on_move(x, y):
+            with self._recording_lock:
+                if not self.recording:
+                    return False
+            with self._events_lock:
+                self.macro_events.append({
+                    "type": "mouse_move",
+                    "x": x,
+                    "y": y,
+                    "timestamp": time.time() - self.recording_start_time,
+                })
 
-                if isinstance(event, mouse.MoveEvent):
-                    with self._events_lock:
-                        self.macro_events.append({
-                            "type": "mouse_move",
-                            "x": event.x,
-                            "y": event.y,
-                            "timestamp": time.time() - self.recording_start_time,
-                        })
+        def on_click(x, y, button, pressed):
+            with self._recording_lock:
+                if not self.recording:
+                    return False
+            with self._events_lock:
+                self.macro_events.append({
+                    "type": "mouse_click",
+                    "button": button.name if hasattr(button, 'name') else str(button),
+                    "action": "down" if pressed else "up",
+                    "timestamp": time.time() - self.recording_start_time,
+                })
 
-                elif isinstance(event, mouse.WheelEvent):
-                    with self._events_lock:
-                        self.macro_events.append({
-                            "type": "mouse_wheel",
-                            "delta": event.delta,
-                            "timestamp": time.time() - self.recording_start_time,
-                        })
+        def on_scroll(x, y, dx, dy):
+            with self._recording_lock:
+                if not self.recording:
+                    return False
+            with self._events_lock:
+                self.macro_events.append({
+                    "type": "mouse_wheel",
+                    "delta": dy,  # Vertical scroll
+                    "timestamp": time.time() - self.recording_start_time,
+                })
 
-                elif isinstance(event, mouse.ButtonEvent):
-                    with self._events_lock:
-                        self.macro_events.append({
-                            "type": "mouse_click",
-                            "button": event.button,
-                            "action": event.event_type,
-                            "timestamp": time.time() - self.recording_start_time,
-                        })
+        # Keyboard event handlers
+        def on_press(key):
+            with self._recording_lock:
+                if not self.recording:
+                    return False
+            try:
+                key_name = key.char if hasattr(key, 'char') else key.name
+            except AttributeError:
+                key_name = str(key)
 
-            def on_key_event(event):
-                with self._recording_lock:
-                    if not self.recording:
-                        return
+            with self._events_lock:
+                self.macro_events.append({
+                    "type": "key_event",
+                    "key": key_name,
+                    "action": "down",
+                    "timestamp": time.time() - self.recording_start_time,
+                })
 
-                with self._events_lock:
-                    self.macro_events.append({
-                        "type": "key_event",
-                        "key": event.name,
-                        "action": event.event_type,
-                        "timestamp": time.time() - self.recording_start_time,
-                    })
+        def on_release(key):
+            with self._recording_lock:
+                if not self.recording:
+                    return False
+            try:
+                key_name = key.char if hasattr(key, 'char') else key.name
+            except AttributeError:
+                key_name = str(key)
 
-            self._mouse_hook = mouse.hook(on_mouse_event)
-            self._keyboard_hook = kb.hook(on_key_event)
+            with self._events_lock:
+                self.macro_events.append({
+                    "type": "key_event",
+                    "key": key_name,
+                    "action": "up",
+                    "timestamp": time.time() - self.recording_start_time,
+                })
 
-        thread = threading.Thread(target=record_events, daemon=True)
-        thread.start()
+        # Start listeners
+        self._mouse_listener = mouse.Listener(
+            on_move=on_move,
+            on_click=on_click,
+            on_scroll=on_scroll
+        )
+        self._keyboard_listener = keyboard.Listener(
+            on_press=on_press,
+            on_release=on_release
+        )
+
+        self._mouse_listener.start()
+        self._keyboard_listener.start()
+
         return True
 
     def stop_recording(self, on_status: Callable[[str], None]) -> bool:
@@ -123,20 +159,14 @@ class MacroRecording:
                 return False
             self.recording = False
 
-        # Remove only our own hooks, not all hooks
-        if mouse and self._mouse_hook:
-            try:
-                mouse.unhook(self._mouse_hook)
-            except Exception:
-                pass
-            self._mouse_hook = None
+        # Stop listeners
+        if self._mouse_listener:
+            self._mouse_listener.stop()
+            self._mouse_listener = None
 
-        if kb and self._keyboard_hook:
-            try:
-                kb.unhook(self._keyboard_hook)
-            except Exception:
-                pass
-            self._keyboard_hook = None
+        if self._keyboard_listener:
+            self._keyboard_listener.stop()
+            self._keyboard_listener = None
 
         on_status(MACRO_RECORDING_STOPPED, count=len(self.macro_events))
         return True
@@ -224,39 +254,70 @@ class MacroRecording:
             on_status(MACRO_NO_EVENTS)
             return False
 
-        if not mouse or not kb:
+        if not MACRO_LIBS_AVAILABLE:
             on_status(MACRO_LIBS_UNAVAILABLE)
             return False
 
         on_status(MACRO_PLAYING)
 
         def playback():
+            mouse_controller = mouse.Controller()
+            keyboard_controller = keyboard.Controller()
+
             for i, event in enumerate(self.macro_events):
                 event_type = event.get("type")
 
-                if event_type == "mouse_move":
-                    mouse.move(event["x"], event["y"])
+                try:
+                    if event_type == "mouse_move":
+                        mouse_controller.position = (event["x"], event["y"])
 
-                elif event_type == "mouse_click":
-                    button = event.get("button", "left")
-                    action = event.get("action", "down")
-                    if action == "down":
-                        mouse.press(button=button)
-                    elif action == "up":
-                        mouse.release(button=button)
+                    elif event_type == "mouse_click":
+                        button_name = event.get("button", "left")
+                        # Convert button string to pynput Button
+                        if button_name == "left":
+                            button = mouse.Button.left
+                        elif button_name == "right":
+                            button = mouse.Button.right
+                        elif button_name == "middle":
+                            button = mouse.Button.middle
+                        else:
+                            button = mouse.Button.left
 
-                elif event_type == "mouse_wheel":
-                    delta = event.get("delta", 0)
-                    mouse.wheel(delta)
+                        action = event.get("action", "down")
+                        if action == "down":
+                            mouse_controller.press(button)
+                        elif action == "up":
+                            mouse_controller.release(button)
 
-                elif event_type == "key_event":
-                    key = event.get("key")
-                    action = event.get("action")
-                    if action == "down":
-                        kb.press(key)
-                    elif action == "up":
-                        kb.release(key)
+                    elif event_type == "mouse_wheel":
+                        delta = event.get("delta", 0)
+                        mouse_controller.scroll(0, delta)
 
+                    elif event_type == "key_event":
+                        key_name = event.get("key")
+                        action = event.get("action")
+
+                        # Try to convert key name to pynput key
+                        try:
+                            # Check if it's a special key
+                            if hasattr(keyboard.Key, key_name):
+                                key = getattr(keyboard.Key, key_name)
+                            else:
+                                # Regular character
+                                key = key_name
+                        except:
+                            key = key_name
+
+                        if action == "down":
+                            keyboard_controller.press(key)
+                        elif action == "up":
+                            keyboard_controller.release(key)
+
+                except Exception as e:
+                    print(f"Error playing event: {e}")
+                    continue
+
+                # Wait for next event
                 if i < len(self.macro_events) - 1:
                     current_ts = event["timestamp"]
                     next_ts = self.macro_events[i + 1]["timestamp"]

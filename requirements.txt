@@ -4,10 +4,9 @@ ttkbootstrap==1.14.2
 # Pillow for ttkbootstrap Themes/Icons
 pillow==10.4.0
 
-# Hotkeys and Mouse Control
-keyboard==0.13.5
+# Hotkeys and Mouse Control (cross-platform)
+pynput==1.7.7
 pyautogui==0.9.54
-mouse==0.7.1
 
 # JSON Schema Validation (Security)
 jsonschema==4.17.3

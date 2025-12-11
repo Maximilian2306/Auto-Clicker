@@ -72,14 +72,22 @@ def verify_build():
     """Verify the build was successful."""
     print("[*] Verifying build...")
 
-    exe_path = Path("dist/ClickMAX.exe")
+    # Determine executable name based on platform
+    if sys.platform == 'win32':
+        exe_name = 'ClickMAX.exe'
+    elif sys.platform == 'darwin':
+        exe_name = 'ClickMAX.app'
+    else:
+        exe_name = 'ClickMAX'
+
+    exe_path = Path(f"dist/{exe_name}")
 
     if not exe_path.exists():
-        print("[ERROR] ClickMAX.exe not found in dist/")
+        print(f"[ERROR] {exe_name} not found in dist/")
         sys.exit(1)
 
     size_mb = exe_path.stat().st_size / (1024 * 1024)
-    print(f"[OK] ClickMAX.exe created ({size_mb:.2f} MB)")
+    print(f"[OK] {exe_name} created ({size_mb:.2f} MB)")
     print(f"   Location: {exe_path.absolute()}\n")
 
 
@@ -87,14 +95,29 @@ def create_zip_release():
     """Create a ZIP file for release."""
     print("[*] Creating release ZIP...")
 
-    zip_name = "ClickMAX-Windows"
+    # Determine platform-specific names
+    if sys.platform == 'win32':
+        exe_name = 'ClickMAX.exe'
+        zip_name = "ClickMAX-Windows"
+    elif sys.platform == 'darwin':
+        exe_name = 'ClickMAX.app'
+        zip_name = "ClickMAX-macOS"
+    else:
+        exe_name = 'ClickMAX'
+        zip_name = "ClickMAX-Linux"
 
     # Create a temporary directory with release contents
     release_dir = Path("dist/release_temp")
     release_dir.mkdir(exist_ok=True)
 
     # Copy executable
-    shutil.copy("dist/ClickMAX.exe", release_dir / "ClickMAX.exe")
+    exe_path = Path(f"dist/{exe_name}")
+    if exe_path.is_dir():
+        # macOS .app bundle
+        shutil.copytree(exe_path, release_dir / exe_name)
+    else:
+        # Windows .exe or Linux executable
+        shutil.copy(exe_path, release_dir / exe_name)
 
     # Copy README if it exists
     if Path("README.md").exists():
@@ -122,12 +145,23 @@ def main():
         verify_build()
         create_zip_release()
 
+        # Platform-specific executable name
+        if sys.platform == 'win32':
+            exe_name = 'ClickMAX.exe'
+            zip_name = 'ClickMAX-Windows.zip'
+        elif sys.platform == 'darwin':
+            exe_name = 'ClickMAX.app'
+            zip_name = 'ClickMAX-macOS.zip'
+        else:
+            exe_name = 'ClickMAX'
+            zip_name = 'ClickMAX-Linux.zip'
+
         print("=" * 60)
         print("Build successful!")
         print("=" * 60)
         print("\nRelease files:")
-        print("  - dist/ClickMAX.exe")
-        print("  - dist/ClickMAX-Windows.zip")
+        print(f"  - dist/{exe_name}")
+        print(f"  - dist/{zip_name}")
         print("\nYou can now upload these to GitHub Releases.")
 
     except KeyboardInterrupt:

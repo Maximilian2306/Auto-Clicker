@@ -13,8 +13,9 @@ a = Analysis(
     hiddenimports=[
         'ttkbootstrap',
         'pyautogui',
-        'keyboard',
-        'mouse',
+        'pynput',
+        'pynput.keyboard',
+        'pynput.mouse',
         'PIL',
         'PIL._tkinter_finder',
     ],

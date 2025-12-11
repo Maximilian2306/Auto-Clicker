@@ -5,18 +5,21 @@ import threading
 from typing import Callable, Optional
 
 try:
-    import mouse
+    from pynput import mouse
+    MOUSE_AVAILABLE = True
 except ImportError:
     mouse = None
+    MOUSE_AVAILABLE = False
 
 from ..events import (CAPTURE_READY, CAPTURE_LISTENING, CAPTURE_SUCCESS, CAPTURE_ERROR)
 
 
 class CaptureCoordinates:
-    """Manages coordinates"""
+    """Manages coordinates using pynput (cross-platform)"""
 
     def __init__(self):
         self.listening = False
+        self._listener = None
 
     def capture_mouse_position(
         self,
@@ -24,7 +27,7 @@ class CaptureCoordinates:
         on_status: Callable[[str], None],
     ):
         """Listen for next click and capture coordinates"""
-        if not mouse:
+        if not MOUSE_AVAILABLE:
             on_status(CAPTURE_ERROR)
             return
 
@@ -35,18 +38,16 @@ class CaptureCoordinates:
         self.listening = True
         on_status(CAPTURE_LISTENING)
 
-        def wait_for_click():
-            def on_click(event):
-                if isinstance(event, mouse.ButtonEvent) and event.event_type == "down":  # Only on mouse down
-                    x, y = mouse.get_position()
-                    on_captured(x, y)
-                    mouse.unhook(on_click)
-                    self.listening = False
+        def on_click(x, y, button, pressed):
+            if pressed:  # Only on mouse down
+                on_captured(x, y)
+                self.listening = False
+                if self._listener:
+                    self._listener.stop()
+                return False  # Stop listener
 
-            mouse.hook(on_click)
-
-        thread = threading.Thread(target=wait_for_click, daemon=True)
-        thread.start()
+        self._listener = mouse.Listener(on_click=on_click)
+        self._listener.start()
 
     def get_current_position(self) -> tuple[int, int]:
         """Get current mouse position"""
