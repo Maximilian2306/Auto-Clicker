@@ -1,7 +1,7 @@
 # autoclicker/logic/setup_hotkeys.py
 """Hotkey Setup Logic - Global keyboard shortcuts"""
 
-from typing import Callable, Dict
+from typing import Callable, Dict, Union, Optional, TYPE_CHECKING
 import sys
 
 try:
@@ -10,6 +10,9 @@ try:
 except ImportError:
     keyboard = None
     HOTKEYS_AVAILABLE = False
+
+if TYPE_CHECKING:
+    from pynput.keyboard import Key, KeyCode
 
 from ..events import (HOTKEY_REGISTERED, HOTKEY_REGISTER_ERROR, HOTKEY_UNKNOWN, HOTKEY_NO_CALLBACK)
 
@@ -30,7 +33,7 @@ class SetupHotkeys:
         self._listener = None
         self._active_combinations = {}
 
-    def _normalize_key(self, key_str: str) -> keyboard.Key or keyboard.KeyCode:
+    def _normalize_key(self, key_str: str) -> Optional[Union['Key', 'KeyCode']]:
         """Convert string key to pynput Key or KeyCode"""
         if not HOTKEYS_AVAILABLE:
             return None

@@ -85,9 +85,16 @@ To Run The Application You Have To Press More Info And Then Run Anyways.
 ## System Requirements
 
 - **Windows:** Windows 10/11
-- **macOS:** macOS 10.13 High Sierra or newer (requires Accessibility permissions)
+- **macOS:** macOS 10.12+ (Sierra or newer, requires Accessibility permissions)
 - **Linux:** Most modern distributions (untested but should work)
-- **Python:** 3.8+ (for running from source)
+- **Python:** 3.8 - 3.14 (for running from source)
+
+### macOS Troubleshooting
+
+**PyObjC is now pinned to version 10.3.1** in `requirements.txt` for maximum compatibility across all macOS versions (10.12+). Simply run:
+```bash
+pip install -r requirements.txt
+```
 
 ## Building from Source
 

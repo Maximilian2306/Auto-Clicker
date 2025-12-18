@@ -23,3 +23,10 @@ pytweening==1.2.0
 # Setuptools and Wheel for packaging
 setuptools==80.9.0
 wheel==0.45.1
+
+# macOS Compatibility (PyObjC)
+# Note: pynput 1.7.7 may auto-install incompatible PyObjC versions
+# For best compatibility on ALL macOS versions (10.12+), pin to PyObjC 10.x:
+pyobjc-core==10.3.1; sys_platform == 'darwin'
+pyobjc-framework-Quartz==10.3.1; sys_platform == 'darwin'
+pyobjc-framework-Cocoa==10.3.1; sys_platform == 'darwin'

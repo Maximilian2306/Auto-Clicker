@@ -2,7 +2,7 @@
 """Coordinate Capture Logic - Capture mouse position on click"""
 
 import threading
-from typing import Callable, Optional
+from typing import Callable, Optional, Tuple
 
 try:
     from pynput import mouse
@@ -49,7 +49,7 @@ class CaptureCoordinates:
         self._listener = mouse.Listener(on_click=on_click)
         self._listener.start()
 
-    def get_current_position(self) -> tuple[int, int]:
+    def get_current_position(self) -> Tuple[int, int]:
         """Get current mouse position"""
         try:
             import pyautogui
